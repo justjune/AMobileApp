@@ -8,7 +8,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="Погода в столицах Южной Америки"
+        android:label="Температура по геокоординатам"
         android:supportsRtl="true"
         android:theme="@style/Theme.Nevermorepayforwater"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -22,6 +22,15 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AddActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.INSERT" />
+
+
             </intent-filter>
         </activity>
 

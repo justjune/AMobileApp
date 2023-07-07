@@ -1,28 +1,19 @@
 package com.smallangrycoders.nevermorepayforwater;
 
+
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.CacheControl;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolder>{
+
 
     interface OnStCityClickListener{
         void onStCityClick(StCity state, int position);
@@ -30,33 +21,41 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
 
     private OnStCityClickListener onClickListener;
     DateTimeFormatter formatq = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
     private final LayoutInflater inflater;
-    private final List<StCity> states;
+    private List<StCity> states;
+    private final Context context;
 
-    StCityAdapter(Context context, List<StCity> states, OnStCityClickListener onClickListener) {
+    StCityAdapter(Context context, List<StCity> states, OnStCityClickListener onClickListener, Context context1) {
         this.onClickListener = onClickListener;
         this.states = states;
         this.inflater = LayoutInflater.from(context);
+
+        this.context = context1;
     }
 
     public void SetOnCl(OnStCityClickListener onClickListener){ this.onClickListener = onClickListener;}
     @Override
-    public StCityAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = inflater.inflate(R.layout.list_item, parent, false);
         return new ViewHolder(view);
     }
-
+    public void setArrayMyData(List<StCity> arrayMyData) {
+        this.states = arrayMyData;
+    }
+    @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(StCityAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         position = holder.getAdapterPosition();
         StCity state = states.get(position);
         holder.nameView.setText(state.getName());
-        holder.tempView.setText("t воздуха: "+state.getTemp());
+
+        String tempro = this.context.getString(R.string.tempro);
+        holder.tempView.setText(tempro+ state.getTemp());
 
         if (state.getSyncDate()!= null){
-            holder.syncDateView.setText("Обновлено "+state.getSyncDate().format(formatq));
+            String refreshed = this.context.getString(R.string.refreshed);
+            holder.syncDateView.setText(refreshed+state.getSyncDate().format(formatq));
         }
 
         int finalPosition = position;
@@ -66,8 +65,8 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
             {
                  onClickListener.onStCityClick(state, finalPosition);
                 if (state.getSyncDate()!= null){
-                    holder.tempView.setText("Обновляем данные");
-                    holder.syncDateView.setText("Обновляем данные");
+                    holder.tempView.setText(R.string.refresh_data);
+                    holder.syncDateView.setText(R.string.refresh_data);
                 }
             }
         });

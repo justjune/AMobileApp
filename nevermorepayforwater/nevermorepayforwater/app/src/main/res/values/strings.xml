@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">nevermorepayforwater</string>
+    <string name="refresh_data">Обновляем данные</string>
+    <string name="refreshed">Обновлено </string>
+    <string name="tempro">t воздуха </string>
+    <string name="forecast_addr">https://api.open-meteo.com/v1/forecast</string>
+    <string name="lat_condition">\?latitude=</string>
+    <string name="lon_condition">&amp;longitude=</string>
+    <string name="add_condition">&amp;current_weather=true</string>
+    <string name="cur_weather">current_weather</string>
+    <string name="temperature">temperature</string>
+    <string name="err_text">Ошибка данных, нужно проверить координаты</string>
+    <string name="deleteAll">Очистить </string>
+    <string name="add">Добавить</string>
+    <string name="exit">Выход</string>
+    <string name="delete">удалить</string>
+    <string name="edit">Редактировать</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отменить</string>
+    <string name="location">Локация</string>
+    <string name="tvLat">Широта</string>
+    <string name="tvLon">Долгота</string>
+    <string name="err_connect">Ошибка связи, погоды не будет.</string>
+
+</resources>
