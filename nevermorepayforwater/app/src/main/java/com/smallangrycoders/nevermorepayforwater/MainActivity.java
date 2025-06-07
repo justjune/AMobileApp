@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -85,70 +89,105 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            StCity st = (StCity) data.getExtras().getSerializable("StCity");
-            stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(), st.getFlagResource(), st.getSyncDate());
-            updateList();
-
+        if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
+            try {
+                StCity st = (StCity) data.getExtras().getSerializable("StCity");
+                if (st != null) {
+                    stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(),
+                            st.getFlagResource(), st.getSyncDate());
+                    updateList();
+                } else {
+                    Toast.makeText(this, R.string.error_invalid_data, Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.error_processing_data, Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
         }
     }
 
     public void sendPOST(StCity state, StCityAdapter adapter) {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()) {
+            runOnUiThread(() -> {
+                state.setTemp(getString(R.string.err_no_internet));
+                adapter.notifyDataSetChanged();
+                stcConnector.update(state);
+                Toast.makeText(oContext, R.string.err_no_internet, Toast.LENGTH_SHORT).show();
+            });
+            return;
+        }
+
         OkHttpClient client = new OkHttpClient();
-        String foreAddr = oContext.getString(R.string.forecast_addr);
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(foreAddr + oContext.getString(R.string.lat_condition) + state.getStrLat() + oContext.getString(R.string.lon_condition) + state.getStrLon() + oContext.getString(R.string.add_condition)).newBuilder();
-        String url = urlBuilder.build().toString();
-        Request request = new Request.Builder()
-                .url(url)
-                .cacheControl(new CacheControl.Builder().maxStale(3, TimeUnit.SECONDS).build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(oContext.getString(R.string.err_text));
-                        adapter.notifyDataSetChanged();
-                        stcConnector.update(state);
-                    });
-                } else {
-                    final String responseData = response.body().string();
-                    JSONObject jo;
-                    try {
-                        jo = new JSONObject(responseData);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
+        try {
+            String foreAddr = oContext.getString(R.string.forecast_addr);
+            HttpUrl.Builder urlBuilder = HttpUrl.parse(foreAddr + oContext.getString(R.string.lat_condition) +
+                    state.getStrLat() + oContext.getString(R.string.lon_condition) +
+                    state.getStrLon() + oContext.getString(R.string.add_condition)).newBuilder();
+
+            if (urlBuilder == null) {
+                throw new MalformedURLException("Invalid URL");
+            }
+
+            String url = urlBuilder.build().toString();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .cacheControl(new CacheControl.Builder().maxStale(3, TimeUnit.SECONDS).build())
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, final Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        handleError(state, adapter, getString(R.string.err_server_response));
+                        return;
                     }
 
-                    String tempFromAPI;
                     try {
-                        tempFromAPI = jo.getJSONObject(oContext.getString(R.string.cur_weather)).get(oContext.getString(R.string.temperature)).toString();
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                        final String responseData = response.body().string();
+                        JSONObject jo = new JSONObject(responseData);
 
-                    MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(tempFromAPI);
-                        adapter.notifyDataSetChanged();
-                        stcConnector.update(state);
-                    });
+                        if (!jo.has(oContext.getString(R.string.cur_weather))) {
+                            handleError(state, adapter, getString(R.string.err_invalid_response));
+                            return;
+                        }
+
+                        String tempFromAPI = jo.getJSONObject(oContext.getString(R.string.cur_weather))
+                                .getString(oContext.getString(R.string.temperature));
+
+                        runOnUiThread(() -> {
+                            state.setTemp(tempFromAPI);
+                            state.setSyncDate(LocalDateTime.now());
+                            adapter.notifyDataSetChanged();
+                            stcConnector.update(state);
+                        });
+                    } catch (JSONException e) {
+                        handleError(state, adapter, getString(R.string.err_parsing_data));
+                    } catch (Exception e) {
+                        handleError(state, adapter, getString(R.string.err_unknown));
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call call, IOException e) {
-                MainActivity.this.runOnUiThread(() -> {
-                    state.setTemp(String.valueOf(R.string.err_connect));
-                    adapter.notifyDataSetChanged();
-                    stcConnector.update(state);
-                });
-
-                e.printStackTrace();
-            }
-
-        });
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    handleError(state, adapter, getString(R.string.err_connection_failed));
+                }
+            });
+        } catch (MalformedURLException e) {
+            handleError(state, adapter, getString(R.string.err_invalid_url));
+        } catch (Exception e) {
+            handleError(state, adapter, getString(R.string.err_unknown));
+        }
     }
 
+    private void handleError(StCity state, StCityAdapter adapter, String error) {
+        runOnUiThread(() -> {
+            state.setTemp(error);
+            adapter.notifyDataSetChanged();
+            stcConnector.update(state);
+            Toast.makeText(oContext, error, Toast.LENGTH_SHORT).show();
+        });
+    }
 }

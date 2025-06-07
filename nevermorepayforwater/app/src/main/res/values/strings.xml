@@ -1,15 +1,14 @@
 <resources>
-    <string name="app_name">nevermorepayforwater</string>
-    <string name="refresh_data">Обновляем данные</string>
-    <string name="refreshed">Обновлено </string>
-    <string name="tempro">t воздуха </string>
+    <string name="tempro">%s ℃</string>
+    <string name="error_template">%s</string>
+    <string name="celcius">\u2103</string>
     <string name="forecast_addr">https://api.open-meteo.com/v1/forecast</string>
     <string name="lat_condition">\?latitude=</string>
     <string name="lon_condition">&amp;longitude=</string>
     <string name="add_condition">&amp;current_weather=true</string>
     <string name="cur_weather">current_weather</string>
     <string name="temperature">temperature</string>
-    <string name="err_text">Ошибка данных, нужно проверить координаты</string>
+
     <string name="deleteAll">Очистить </string>
     <string name="add">Добавить</string>
     <string name="exit">Выход</string>
@@ -22,4 +21,25 @@
     <string name="tvLon">Долгота</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
 
+    <string name="error_invalid_data">Получены неверные данные</string>
+    <string name="error_processing_data">Ошибка обработки данных</string>
+    <string name="err_unknown">Произошла неизвестная ошибка</string>
+
+    <string name="error_empty_name">Название не может быть пустым</string>
+    <string name="error_invalid_lat">Широта должна быть от -90 до 90</string>
+    <string name="error_invalid_lon">Долгота должна быть от -180 до 180</string>
+    <string name="error_invalid_coordinates">Неверный формат координат</string>
+
+    <string name="err_no_internet">Нет подключения к интернету</string>
+    <string name="err_server_response">Ошибка получения данных</string>
+    <string name="err_invalid_response">Неверный ответ сервера</string>
+    <string name="err_parsing_data">Ошибка обработки данных</string>
+    <string name="err_connection_failed">Ошибка соединения с сервером</string>
+    <string name="err_invalid_url">Неверный URL адрес</string>
+
+    <string name="data_refreshed">Данные обновлены</string>
+    <string name="data_saved">Данные сохранены</string>
+    <string name="data_deleted">Данные удалены</string>
+    <string name="refreshed">Обновлено: </string>
+    <string name="refresh_data">Обновление...</string>
 </resources>

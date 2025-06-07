@@ -54,23 +54,29 @@ public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder
         StCity state = states.get(position);
         holder.nameView.setText(state.getName());
 
-        String tempro = this.context.getString(R.string.tempro);
-        holder.tempView.setText(tempro + state.getTemp());
+        // Обработка температуры
+        if (state.getTemp().startsWith(context.getString(R.string.err_no_internet)) ||
+                state.getTemp().startsWith(context.getString(R.string.err_connection_failed))) {
+            holder.tempView.setText(state.getTemp());
+        } else {
+            holder.tempView.setText(String.format(context.getString(R.string.tempro), state.getTemp()));
+        }
 
         if (state.getSyncDate() != null) {
+            holder.syncDateView.setVisibility(View.VISIBLE);
             String refreshed = this.context.getString(R.string.refreshed);
             holder.syncDateView.setText(refreshed + state.getSyncDate().format(formatq));
+        } else {
+            holder.syncDateView.setVisibility(View.GONE);
         }
 
         int finalPosition = position;
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickListener.onStCityClick(state, finalPosition);
-                if (state.getSyncDate() != null) {
-                    holder.tempView.setText(R.string.refresh_data);
-                    holder.syncDateView.setText(R.string.refresh_data);
-                }
+        holder.itemView.setOnClickListener(v -> {
+            onClickListener.onStCityClick(state, finalPosition);
+
+            if (state.getSyncDate() != null) {
+                holder.tempView.setText(R.string.refresh_data);
+                holder.syncDateView.setText(R.string.refresh_data);
             }
         });
     }

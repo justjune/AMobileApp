@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,16 +40,30 @@ public class DBCities {
         stcDataBase = mOpenHelper.getWritableDatabase();
     }
 
-    //methods
-    public static void insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
-        ContentValues cv = new ContentValues();
-        cv.put(COLUMN_NAME, name);
-        cv.put(COLUMN_TEMPR, temp);
-        cv.put(COLUMN_LAT, lat);
-        cv.put(COLUMN_LON, lon);
-        cv.put(COLUMN_FLAG2, flag);
-        cv.put(COLUMN_SYNCDATE, String.valueOf(syncDate));
-        stcDataBase.insert(TABLE_NAME, null, cv);
+    public void insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
+        if (stcDataBase == null || !stcDataBase.isOpen()) {
+            Log.e("DBCities", "Database is not available");
+            return;
+        }
+
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(COLUMN_NAME, name);
+            cv.put(COLUMN_TEMPR, temp);
+            cv.put(COLUMN_LAT, lat);
+            cv.put(COLUMN_LON, lon);
+            cv.put(COLUMN_FLAG2, flag);
+            cv.put(COLUMN_SYNCDATE, syncDate != null ? syncDate.toString() : null);
+
+            long result = stcDataBase.insert(TABLE_NAME, null, cv);
+            if (result == -1) {
+                Log.e("DBCities", "Failed to insert record - possible constraint violation");
+            }
+        } catch (SQLiteException e) {
+            Log.e("DBCities", "Database error", e);
+        } catch (Exception e) {
+            Log.e("DBCities", "Unexpected error", e);
+        }
     }
 
     public int update(StCity stc) {
