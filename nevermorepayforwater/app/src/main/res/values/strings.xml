@@ -1,8 +1,10 @@
 <resources>
+    <string name="forecast_addr">https://api.open-meteo.com/v1/forecast</string>
+
     <string name="tempro">%s ℃</string>
     <string name="error_template">%s</string>
     <string name="celcius">\u2103</string>
-    <string name="forecast_addr">https://api.open-meteo.com/v1/forecast</string>
+
     <string name="lat_condition">\?latitude=</string>
     <string name="lon_condition">&amp;longitude=</string>
     <string name="add_condition">&amp;current_weather=true</string>
@@ -12,13 +14,10 @@
     <string name="deleteAll">Очистить </string>
     <string name="add">Добавить</string>
     <string name="exit">Выход</string>
-    <string name="delete">удалить</string>
     <string name="edit">Редактировать</string>
     <string name="save">Сохранить</string>
     <string name="cancel">Отменить</string>
-    <string name="location">Локация</string>
-    <string name="tvLat">Широта</string>
-    <string name="tvLon">Долгота</string>
+    <string name="location">Новая локация</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
 
     <string name="error_invalid_data">Получены неверные данные</string>
@@ -37,9 +36,11 @@
     <string name="err_connection_failed">Ошибка соединения с сервером</string>
     <string name="err_invalid_url">Неверный URL адрес</string>
 
-    <string name="data_refreshed">Данные обновлены</string>
-    <string name="data_saved">Данные сохранены</string>
-    <string name="data_deleted">Данные удалены</string>
     <string name="refreshed">Обновлено: </string>
     <string name="refresh_data">Обновление...</string>
+
+    <string name="unnamed_location">Безымянная локация</string>
+    <string name="location_name_hint">Название локации</string>
+    <string name="latitude_hint">Широта</string>
+    <string name="longitude_hint">Долгота</string>
 </resources>
