@@ -7,15 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolder>{
-
-
-    interface OnStCityClickListener{
+public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder> {
+    interface OnStCityClickListener {
         void onStCityClick(StCity state, int position);
     }
 
@@ -33,16 +32,21 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
         this.context = context1;
     }
 
-    public void SetOnCl(OnStCityClickListener onClickListener){ this.onClickListener = onClickListener;}
+    public void SetOnCl(OnStCityClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = inflater.inflate(R.layout.list_item, parent, false);
         return new ViewHolder(view);
     }
+
     public void setArrayMyData(List<StCity> arrayMyData) {
         this.states = arrayMyData;
     }
+
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
@@ -51,20 +55,19 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
         holder.nameView.setText(state.getName());
 
         String tempro = this.context.getString(R.string.tempro);
-        holder.tempView.setText(tempro+ state.getTemp());
+        holder.tempView.setText(tempro + state.getTemp());
 
-        if (state.getSyncDate()!= null){
+        if (state.getSyncDate() != null) {
             String refreshed = this.context.getString(R.string.refreshed);
-            holder.syncDateView.setText(refreshed+state.getSyncDate().format(formatq));
+            holder.syncDateView.setText(refreshed + state.getSyncDate().format(formatq));
         }
 
         int finalPosition = position;
-        holder.itemView.setOnClickListener(new View.OnClickListener(){
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
-                 onClickListener.onStCityClick(state, finalPosition);
-                if (state.getSyncDate()!= null){
+            public void onClick(View v) {
+                onClickListener.onStCityClick(state, finalPosition);
+                if (state.getSyncDate() != null) {
                     holder.tempView.setText(R.string.refresh_data);
                     holder.syncDateView.setText(R.string.refresh_data);
                 }
@@ -81,7 +84,8 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         final TextView nameView, tempView, syncDateView;
-        ViewHolder(View view){
+
+        ViewHolder(View view) {
             super(view);
             nameView = view.findViewById(R.id.name);
             tempView = view.findViewById(R.id.temp);
