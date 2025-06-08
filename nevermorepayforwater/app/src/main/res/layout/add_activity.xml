@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
     android:padding="24dp">
 
     <TextView
@@ -12,13 +12,14 @@
         android:layout_height="wrap_content"
         android:text="@string/location"
         android:textAlignment="center"
-        android:textColor="@color/text_primary"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/cityContainer"
+        style="@style/TextInput.Dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -29,26 +30,48 @@
             android:id="@+id/City"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapWords"/>
+            android:inputType="textCapWords"
+            android:textColor="?android:attr/textColorPrimary" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/location_hint_example"
+        android:textColor="?android:attr/textColorHint"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/cityContainer" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/butSearch"
+        style="@style/Button.Dark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/search"
+        app:layout_constraintTop_toBottomOf="@+id/cityContainer" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/latContainer"
+        style="@style/TextInput.Dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="@string/latitude_hint"
-        app:layout_constraintTop_toBottomOf="@id/cityContainer">
+        app:layout_constraintTop_toBottomOf="@id/butSearch">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal|numberSigned"/>
+            android:inputType="numberDecimal|numberSigned"
+            android:textColor="?android:attr/textColorPrimary" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lonContainer"
+        style="@style/TextInput.Dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -59,7 +82,8 @@
             android:id="@+id/etLon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal|numberSigned"/>
+            android:inputType="numberDecimal|numberSigned"
+            android:textColor="?android:attr/textColorPrimary" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
@@ -74,20 +98,20 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/butCancel"
-            style="@style/RoundedButtonStyle.Outlined"
+            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="@string/cancel"/>
+            android:text="@string/cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/butSave"
-            style="@style/RoundedButtonStyle"
+            style="?attr/buttonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="@string/save"/>
+            android:text="@string/save" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

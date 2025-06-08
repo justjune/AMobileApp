@@ -1,5 +1,6 @@
 <resources>
     <string name="forecast_addr">https://api.open-meteo.com/v1/forecast</string>
+    <string name="geocoding_addr">https://geocoding-api.open-meteo.com/v1/search</string>
 
     <string name="tempro">%s ℃</string>
     <string name="error_template">%s</string>
@@ -19,6 +20,7 @@
     <string name="cancel">Отменить</string>
     <string name="location">Новая локация</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
+    <string name="search">Поиск</string>
 
     <string name="error_invalid_data">Получены неверные данные</string>
     <string name="error_processing_data">Ошибка обработки данных</string>
@@ -28,6 +30,7 @@
     <string name="error_invalid_lat">Широта должна быть от -90 до 90</string>
     <string name="error_invalid_lon">Долгота должна быть от -180 до 180</string>
     <string name="error_invalid_coordinates">Неверный формат координат</string>
+    <string name="error_english_only">Используйте только английские буквы</string>
 
     <string name="err_no_internet">Нет подключения к интернету</string>
     <string name="err_server_response">Ошибка получения данных</string>
@@ -35,12 +38,16 @@
     <string name="err_parsing_data">Ошибка обработки данных</string>
     <string name="err_connection_failed">Ошибка соединения с сервером</string>
     <string name="err_invalid_url">Неверный URL адрес</string>
+    <string name="err_location_not_found">Локация не найдена</string>
+    <string name="try_examples">Попробуйте: Moscow, Novosibirsk</string>
 
     <string name="refreshed">Обновлено: </string>
     <string name="refresh_data">Обновление...</string>
+    <string name="location_found">Координаты найдены</string>
 
     <string name="unnamed_location">Безымянная локация</string>
-    <string name="location_name_hint">Название локации</string>
+    <string name="location_name_hint">Название на английском</string>
     <string name="latitude_hint">Широта</string>
     <string name="longitude_hint">Долгота</string>
+    <string name="location_hint_example">Например: Moscow, Novosibirsk</string>
 </resources>

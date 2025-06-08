@@ -7,29 +7,62 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.regex.Pattern;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class AddActivity extends Activity {
-    private Button btSave, btCancel;
+    private Button btSave, btCancel, btSearch;
     private EditText etLoc, etLat, etLon;
+    private static final Pattern ENGLISH_PATTERN = Pattern.compile("^[a-zA-Z\\s\\-',.]+$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_activity);
-        btSave = (Button) findViewById(R.id.butSave);
-        btCancel = (Button) findViewById(R.id.butCancel);
-        etLoc = (EditText) findViewById(R.id.City);
-        etLat = (EditText) findViewById(R.id.etLat);
-        etLon = (EditText) findViewById(R.id.etLon);
+        btSave = findViewById(R.id.butSave);
+        btCancel = findViewById(R.id.butCancel);
+        btSearch = findViewById(R.id.butSearch);
+        etLoc = findViewById(R.id.City);
+        etLat = findViewById(R.id.etLat);
+        etLon = findViewById(R.id.etLon);
+
+        btSearch.setOnClickListener(v -> {
+            String name = etLoc.getText().toString().trim();
+            if (name.isEmpty()) {
+                etLoc.setError(getString(R.string.error_empty_name));
+                return;
+            }
+            if (!ENGLISH_PATTERN.matcher(name).matches()) {
+                etLoc.setError(getString(R.string.error_english_only));
+                return;
+            }
+            searchLocation(name);
+        });
 
         btSave.setOnClickListener(v -> {
             String latStr = etLat.getText().toString();
             String lonStr = etLon.getText().toString();
-            String name = etLoc.getText().toString();
+            String name = etLoc.getText().toString().trim();
 
             if (name.isEmpty()) {
                 etLoc.setError(getString(R.string.error_empty_name));
+                return;
+            }
+            if (!ENGLISH_PATTERN.matcher(name).matches()) {
+                etLoc.setError(getString(R.string.error_english_only));
                 return;
             }
 
@@ -58,5 +91,74 @@ public class AddActivity extends Activity {
         });
 
         btCancel.setOnClickListener(v -> finish());
+    }
+
+    private void searchLocation(String name) {
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(getString(R.string.geocoding_addr))).newBuilder();
+        urlBuilder.addQueryParameter("name", name);
+        urlBuilder.addQueryParameter("count", "1");
+        urlBuilder.addQueryParameter("language", "en");
+
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(AddActivity.this, R.string.err_connection_failed, Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddActivity.this, R.string.try_examples, Toast.LENGTH_LONG).show();
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(AddActivity.this, R.string.err_server_response, Toast.LENGTH_LONG).show();
+                        Toast.makeText(AddActivity.this, R.string.try_examples, Toast.LENGTH_LONG).show();
+                    });
+                    return;
+                }
+
+                try {
+                    String responseData = Objects.requireNonNull(response.body()).string();
+                    JSONObject json = new JSONObject(responseData);
+                    if (!json.has("results")) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(AddActivity.this, R.string.err_location_not_found, Toast.LENGTH_LONG).show();
+                            Toast.makeText(AddActivity.this, R.string.try_examples, Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
+
+                    JSONArray results = json.getJSONArray("results");
+                    if (results.length() == 0) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(AddActivity.this, R.string.err_location_not_found, Toast.LENGTH_LONG).show();
+                            Toast.makeText(AddActivity.this, R.string.try_examples, Toast.LENGTH_LONG).show();
+                        });
+                        return;
+                    }
+
+                    JSONObject location = results.getJSONObject(0);
+                    double latitude = location.getDouble("latitude");
+                    double longitude = location.getDouble("longitude");
+
+                    runOnUiThread(() -> {
+                        etLat.setText(String.valueOf(latitude));
+                        etLon.setText(String.valueOf(longitude));
+                        Toast.makeText(AddActivity.this, R.string.location_found, Toast.LENGTH_SHORT).show();
+                    });
+                } catch (JSONException e) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(AddActivity.this, R.string.err_parsing_data, Toast.LENGTH_LONG).show();
+                        Toast.makeText(AddActivity.this, R.string.try_examples, Toast.LENGTH_LONG).show();
+                    });
+                }
+            }
+        });
     }
 }
