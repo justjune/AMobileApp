@@ -7,4 +7,21 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- City item colors -->
+    <color name="city_name_color">#2C3E50</color>
+    <color name="temperature_color">#E74C3C</color>
+    <color name="sync_date_color">#7F8C8D</color>
+
+    <!-- App bar colors -->
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#03A9F4</color>
+    <color name="status_bar">#1565C0</color>
+
+    <!-- Text colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="hint_color">#BDBDBD</color>
 </resources>

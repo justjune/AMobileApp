@@ -5,13 +5,16 @@
     tools:context="com.smallangrycoders.nevermorepayforwater">
     <item android:id="@+id/add"
         android:title="@string/add"
-        android:icon="@android:drawable/ic_menu_add"/>
+        android:icon="@drawable/ic_add"
+        app:showAsAction="always|withText"/>
 
     <item android:id="@+id/deleteAll"
         android:title="@string/deleteAll"
-        android:icon="@android:drawable/ic_menu_delete"/>
+        android:icon="@drawable/ic_delete"
+        app:showAsAction="ifRoom|withText"/>
 
     <item android:id="@+id/exit"
         android:title="@string/exit"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
+        android:icon="@drawable/ic_exit"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

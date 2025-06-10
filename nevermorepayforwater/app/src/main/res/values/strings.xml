@@ -27,5 +27,5 @@
     <string name="enter_city_name">Введите название города</string>
     <string name="butSave">Сохранить</string>
     <string name="butCancel">Отмена</string>
-
+    <string name="add_new_city">Добавление нового города</string>
 </resources>
