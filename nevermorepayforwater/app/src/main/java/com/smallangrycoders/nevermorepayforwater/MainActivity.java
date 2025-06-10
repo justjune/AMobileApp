@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<StCity> states = new ArrayList<StCity>();
     StCityAdapter adapter;
     int ADD_ACTIVITY = 0;
+    private int pendingUpdates = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,21 +72,23 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add:
-                Intent i = new Intent(oContext, AddActivity.class);
-                startActivityForResult (i, ADD_ACTIVITY);
-                return true;
-            case R.id.deleteAll:
-                stcConnector.deleteAll();
-                updateList ();
-                return true;
-            case R.id.exit:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        if (id == R.id.add) {
+            Intent intent = new Intent(this, AddActivity.class);
+            startActivityForResult(intent, ADD_ACTIVITY);
+            return true;
+        } else if (id == R.id.deleteAll) {
+            stcConnector.deleteAll();
+            updateList();
+            return true;
+        } else if (id == R.id.exit) {
+            finish();
+            return true;
+        } else if (id == R.id.refresh_all) {
+            refreshAllCities();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -157,4 +161,87 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void refreshAllCities() {
+        ArrayList<StCity> cities = stcConnector.selectAll();
+        if (cities.isEmpty()) {
+            Toast.makeText(this, "Нет сохраненных городов", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        pendingUpdates = cities.size();
+        Toast.makeText(this, "Обновляем данные...", Toast.LENGTH_SHORT).show();
+        
+        for (StCity city : cities) {
+            refreshCity(city);
+        }
+    }
+
+    private void refreshCity(StCity city) {
+        String addr = getString(R.string.forecast_addr);
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(addr).newBuilder();
+        urlBuilder.addQueryParameter("latitude", city.getStrLat());
+        urlBuilder.addQueryParameter("longitude", city.getStrLon());
+        urlBuilder.addQueryParameter("current_weather", "true");
+
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .cacheControl(new CacheControl.Builder().maxAge(0, TimeUnit.SECONDS).build())
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() -> {
+                    city.setTemp(getString(R.string.err_connect));
+                    city.setSyncDate(LocalDateTime.now());
+                    stcConnector.update(city);
+                    checkAndUpdateUI();
+                });
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    runOnUiThread(() -> {
+                        city.setTemp(getString(R.string.err_text));
+                        city.setSyncDate(LocalDateTime.now());
+                        stcConnector.update(city);
+                        checkAndUpdateUI();
+                    });
+                    return;
+                }
+
+                try {
+                    final String responseData = response.body().string();
+                    JSONObject jo = new JSONObject(responseData);
+                    String tempFromAPI = jo.getJSONObject(getString(R.string.cur_weather))
+                            .get(getString(R.string.temperature)).toString();
+
+                    runOnUiThread(() -> {
+                        city.setTemp(tempFromAPI);
+                        city.setSyncDate(LocalDateTime.now());
+                        stcConnector.update(city);
+                        checkAndUpdateUI();
+                    });
+                } catch (JSONException e) {
+                    runOnUiThread(() -> {
+                        city.setTemp(getString(R.string.err_text));
+                        city.setSyncDate(LocalDateTime.now());
+                        stcConnector.update(city);
+                        checkAndUpdateUI();
+                    });
+                }
+            }
+        });
+    }
+
+    private synchronized void checkAndUpdateUI() {
+        pendingUpdates--;
+        if (pendingUpdates <= 0) {
+            updateList();
+            Toast.makeText(this, "Обновление завершено", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

@@ -28,4 +28,5 @@
     <string name="butSave">Сохранить</string>
     <string name="butCancel">Отмена</string>
     <string name="add_new_city">Добавление нового города</string>
+    <string name="refresh_all">Обновить все</string>
 </resources>
