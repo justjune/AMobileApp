@@ -2,27 +2,24 @@ package com.smallangrycoders.nevermorepayforwater;
 
 import android.app.Activity;
 import android.content.Context;
-
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.appbar.MaterialToolbar;
-
+import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -38,38 +35,48 @@ public class MainActivity extends AppCompatActivity {
     StCityAdapter adapter;
     int ADD_ACTIVITY = 0;
     private int pendingUpdates = 0;
+    private int failedUpdates = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Setup toolbar
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         RecyclerView recyclerView = findViewById(R.id.list);
-        oContext=this;
-        stcConnector=new DBCities(this);
+        oContext = this;
+        stcConnector = new DBCities(this);
         adapter = new StCityAdapter(this, stcConnector.selectAll(), null, oContext);
         StCityAdapter.OnStCityClickListener stateClickListener = (state, position) -> {
-
-           sendPOST(state, adapter);
-            state.setSyncDate(LocalDateTime.now());
-
+            if (isNetworkAvailable()) {
+                sendPOST(state, adapter);
+                state.setSyncDate(LocalDateTime.now());
+            } else {
+                showError(getString(R.string.error_no_internet));
+            }
         };
-       adapter.SetOnCl(stateClickListener);
-       recyclerView.setAdapter(adapter);
+        adapter.SetOnCl(stateClickListener);
+        recyclerView.setAdapter(adapter);
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    private void showError(String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    private void updateList () {
-        adapter.setArrayMyData(stcConnector.selectAll());
-        adapter.notifyDataSetChanged();
-    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -78,29 +85,38 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, ADD_ACTIVITY);
             return true;
         } else if (id == R.id.deleteAll) {
-            stcConnector.deleteAll();
-            updateList();
+            if (!stcConnector.selectAll().isEmpty()) {
+                stcConnector.deleteAll();
+                updateList();
+                showError(getString(R.string.cities_deleted));
+            } else {
+                showError(getString(R.string.no_cities_to_delete));
+            }
             return true;
         } else if (id == R.id.exit) {
             finish();
             return true;
         } else if (id == R.id.refresh_all) {
-            refreshAllCities();
+            if (isNetworkAvailable()) {
+                refreshAllCities();
+            } else {
+                showError(getString(R.string.error_no_internet));
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             StCity st = (StCity) data.getExtras().getSerializable("StCity");
             stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(), st.getFlagResource(), st.getSyncDate());
             updateList();
-
         }
     }
+
     public void sendPOST(StCity state, StCityAdapter adapter) {
         OkHttpClient client = new OkHttpClient();
         String foreAddr = oContext.getString(R.string.forecast_addr);
@@ -164,12 +180,13 @@ public class MainActivity extends AppCompatActivity {
     private void refreshAllCities() {
         ArrayList<StCity> cities = stcConnector.selectAll();
         if (cities.isEmpty()) {
-            Toast.makeText(this, "Нет сохраненных городов", Toast.LENGTH_SHORT).show();
+            showError(getString(R.string.error_no_cities));
             return;
         }
         
         pendingUpdates = cities.size();
-        Toast.makeText(this, "Обновляем данные...", Toast.LENGTH_SHORT).show();
+        failedUpdates = 0;
+        showError(getString(R.string.update_started, pendingUpdates));
         
         for (StCity city : cities) {
             refreshCity(city);
@@ -178,12 +195,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshCity(StCity city) {
         String addr = getString(R.string.forecast_addr);
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(addr).newBuilder();
-        urlBuilder.addQueryParameter("latitude", city.getStrLat());
-        urlBuilder.addQueryParameter("longitude", city.getStrLon());
-        urlBuilder.addQueryParameter("current_weather", "true");
+        HttpUrl.Builder urlBuilder;
+        try {
+            urlBuilder = HttpUrl.parse(addr).newBuilder();
+            if (urlBuilder == null) {
+                throw new IllegalArgumentException("Неверный URL");
+            }
+        } catch (Exception e) {
+            handleError(city, getString(R.string.error_invalid_url));
+            return;
+        }
 
-        OkHttpClient client = new OkHttpClient();
+        try {
+            urlBuilder.addQueryParameter("latitude", city.getStrLat());
+            urlBuilder.addQueryParameter("longitude", city.getStrLon());
+            urlBuilder.addQueryParameter("current_weather", "true");
+        } catch (Exception e) {
+            handleError(city, getString(R.string.error_invalid_coordinates));
+            return;
+        }
+
+        OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .build();
+
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
                 .cacheControl(new CacheControl.Builder().maxAge(0, TimeUnit.SECONDS).build())
@@ -192,24 +229,21 @@ public class MainActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> {
-                    city.setTemp(getString(R.string.err_connect));
-                    city.setSyncDate(LocalDateTime.now());
-                    stcConnector.update(city);
-                    checkAndUpdateUI();
-                });
-                e.printStackTrace();
+                String errorMessage;
+                if (e instanceof UnknownHostException) {
+                    errorMessage = getString(R.string.error_server_connection);
+                } else if (e instanceof java.net.SocketTimeoutException) {
+                    errorMessage = getString(R.string.error_timeout);
+                } else {
+                    errorMessage = getString(R.string.error_network, e.getMessage());
+                }
+                handleError(city, errorMessage);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    runOnUiThread(() -> {
-                        city.setTemp(getString(R.string.err_text));
-                        city.setSyncDate(LocalDateTime.now());
-                        stcConnector.update(city);
-                        checkAndUpdateUI();
-                    });
+                    handleError(city, getString(R.string.error_server, response.code()));
                     return;
                 }
 
@@ -226,14 +260,19 @@ public class MainActivity extends AppCompatActivity {
                         checkAndUpdateUI();
                     });
                 } catch (JSONException e) {
-                    runOnUiThread(() -> {
-                        city.setTemp(getString(R.string.err_text));
-                        city.setSyncDate(LocalDateTime.now());
-                        stcConnector.update(city);
-                        checkAndUpdateUI();
-                    });
+                    handleError(city, getString(R.string.error_data_format));
                 }
             }
+        });
+    }
+
+    private void handleError(StCity city, String errorMessage) {
+        runOnUiThread(() -> {
+            city.setTemp(errorMessage);
+            city.setSyncDate(LocalDateTime.now());
+            stcConnector.update(city);
+            failedUpdates++;
+            checkAndUpdateUI();
         });
     }
 
@@ -241,7 +280,20 @@ public class MainActivity extends AppCompatActivity {
         pendingUpdates--;
         if (pendingUpdates <= 0) {
             updateList();
-            Toast.makeText(this, "Обновление завершено", Toast.LENGTH_SHORT).show();
+            int successUpdates = states.size() - failedUpdates;
+            if (failedUpdates > 0) {
+                showError(getString(R.string.update_complete_with_errors, 
+                    successUpdates, failedUpdates));
+            } else {
+                showError(getString(R.string.update_complete_success));
+            }
+            failedUpdates = 0;
         }
+    }
+
+    private void updateList() {
+        states = stcConnector.selectAll();
+        adapter.setArrayMyData(states);
+        adapter.notifyDataSetChanged();
     }
 }
