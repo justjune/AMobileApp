@@ -1,0 +1,15 @@
+/nevermorepayforwater/.idea
+/nevermorepayforwater/*.iml
+/nevermorepayforwater/.gradle
+/nevermorepayforwater/local.properties
+/nevermorepayforwater/.idea/caches
+/nevermorepayforwater/.idea/libraries
+/nevermorepayforwater/.idea/modules.xml
+/nevermorepayforwater/.idea/workspace.xml
+/nevermorepayforwater/.idea/navEditor.xml
+/nevermorepayforwater/.idea/assetWizardSettings.xml
+/nevermorepayforwater.DS_Store
+/nevermorepayforwater/build
+/nevermorepayforwater/captures
+/nevermorepayforwater/.externalNativeBuild
+/nevermorepayforwater/.cxx
