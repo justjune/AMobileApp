@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     StCityAdapter adapter;
     int ADD_ACTIVITY = 0;
 
+    private ApiService apiService = ApiService.getInstance(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,62 +94,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void sendPOST(StCity state, StCityAdapter adapter) {
-        OkHttpClient client = new OkHttpClient();
-        String foreAddr = oContext.getString(R.string.forecast_addr);
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(foreAddr+oContext.getString(R.string.lat_condition)+state.getStrLat()+oContext.getString(R.string.lon_condition)+state.getStrLon()+oContext.getString(R.string.add_condition)).newBuilder();
-        String url = urlBuilder.build().toString();
-        Request request = new Request.Builder()
-                .url(url)
-                .cacheControl(new CacheControl.Builder().maxStale(3, TimeUnit.SECONDS).build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
+
+        apiService.getWeather(state, new ApiService.WeatherCallback() {
             @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful())
-                    {
-                    MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(oContext.getString(R.string.err_text));
-                        adapter.notifyDataSetChanged();
-                        stcConnector.update(state);
-                    });
-                    }
-                else
-                    {
-                    final String responseData = response.body().string();
-                    JSONObject jo;
-                    try {
-                        jo = new JSONObject(responseData);
-                        }
-                    catch (JSONException e)
-                        {
-                            throw new RuntimeException(e);
-                        }
-                    String tempFromAPI;
-                    try {
-                        tempFromAPI =  jo.getJSONObject(oContext.getString(R.string.cur_weather)).get(oContext.getString(R.string.temperature)).toString();
-                        }
-                    catch (JSONException e)
-                        {
-                        throw new RuntimeException(e);
-                        }
-                    MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(tempFromAPI);
-                        adapter.notifyDataSetChanged();
-                        stcConnector.update(state);
-                    });
-                }
-            }
-            @Override
-            public void onFailure(Call call, IOException e) {
-                MainActivity.this.runOnUiThread(() -> {
-                    state.setTemp(String.valueOf(R.string.err_connect));
+            public void onSuccess(String temperature) {
+                runOnUiThread(() -> {
+                    state.setTemp(temperature);
+                    state.setSyncDate(LocalDateTime.now());
                     adapter.notifyDataSetChanged();
                     stcConnector.update(state);
                 });
-
-                e.printStackTrace();
             }
 
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> {
+                    state.setTemp(error);
+                    adapter.notifyDataSetChanged();
+                    stcConnector.update(state);
+                });
+            }
         });
     }
 

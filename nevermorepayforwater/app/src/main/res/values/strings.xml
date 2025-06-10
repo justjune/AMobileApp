@@ -21,5 +21,6 @@
     <string name="tvLat">Широта</string>
     <string name="tvLon">Долгота</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
+    <string name="Lookup">НАЙТИ</string>
 
 </resources>
