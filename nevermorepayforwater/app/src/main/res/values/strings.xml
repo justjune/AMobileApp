@@ -21,6 +21,11 @@
     <string name="location">Локация</string>
     <string name="tvLat">Широта</string>
     <string name="tvLon">Долгота</string>
+    <string name="koords">Найти координаты</string>
+    <string name="location_hint">Введите название города</string>
+    <string name="lat_hint">Введите широту (например, 55.7558)</string>
+    <string name="lon_hint">Введите долготу (например, 37.6173)</string>
+    <string name="opencage_key">5e1684ca9db24b2ab7cf0f9a6d83271b</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
 
 </resources>
