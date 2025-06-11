@@ -11,6 +11,7 @@
     <string name="temperature">temperature</string>
     <string name="err_text">Ошибка данных, нужно проверить координаты</string>
     <string name="deleteAll">Очистить </string>
+    <string name="heat_calc">Калькулятор тепла</string>
     <string name="add">Добавить</string>
     <string name="exit">Выход</string>
     <string name="delete">удалить</string>
