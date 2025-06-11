@@ -21,5 +21,28 @@
     <string name="tvLat">Широта</string>
     <string name="tvLon">Долгота</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
+    <string name="geocoding_base_url">https://maps.googleapis.com/maps/api/geocode/json</string>
+    <string name="err_no_results">Город не найден</string>
+    <string name="searching_location">Поиск координат...</string>
+    <string name="enter_city_name">Введите название города</string>
+    <string name="butSave">Сохранить</string>
+    <string name="butCancel">Отмена</string>
+    <string name="add_new_city">Добавление нового города</string>
+    <string name="refresh_all">Обновить все</string>
 
+    <!-- Error messages -->
+    <string name="error_no_internet">Отсутствует подключение к интернету</string>
+    <string name="error_no_cities">Нет сохраненных городов</string>
+    <string name="error_invalid_url">Ошибка в URL адресе</string>
+    <string name="error_invalid_coordinates">Ошибка в координатах города</string>
+    <string name="error_server_connection">Ошибка подключения к серверу</string>
+    <string name="error_timeout">Превышено время ожидания ответа</string>
+    <string name="error_server">Ошибка сервера: %1$d</string>
+    <string name="error_data_format">Ошибка в формате данных</string>
+    <string name="error_network">Ошибка сети: %1$s</string>
+    <string name="update_started">Обновляем данные для %1$d городов...</string>
+    <string name="update_complete_with_errors">Обновление завершено. Успешно: %1$d, с ошибками: %2$d</string>
+    <string name="update_complete_success">Все города успешно обновлены</string>
+    <string name="cities_deleted">Все города удалены</string>
+    <string name="no_cities_to_delete">Нет сохраненных городов для удаления</string>
 </resources>
