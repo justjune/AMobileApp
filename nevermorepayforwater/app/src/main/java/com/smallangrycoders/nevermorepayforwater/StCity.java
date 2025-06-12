@@ -19,10 +19,10 @@ public class StCity implements Serializable {
     public String getTemp() {
         return this.temp;
     }
-    public String getStrLat() {
+    public String getLatitude() {
         return String.valueOf(this.lat);
     }
-    public String getStrLon() {
+    public String getLongtitude() {
         return String.valueOf(this.lon);
     }
     public int getFlagResource() {
