@@ -21,5 +21,18 @@
     <string name="tvLat">Широта</string>
     <string name="tvLon">Долгота</string>
     <string name="err_connect">Ошибка связи, погоды не будет.</string>
-
+    <string name="err_empty_fields">Заполните все поля</string>
+    <string name="err_not_number">Широта и долгота должны быть числами</string>
+    <string name="err_wrong_range">Широта ±90°, долгота ±180°</string>
+    <string name="err_network">Не удалось подключиться к серверу</string>
+    <string name="err_server">Ошибка сервера: %1$d</string>
+    <string name="err_parse">Сервер прислал непонятный ответ</string>
+    <string name="msg_city_saved">Город сохранён</string>
+    <string name="msg_coords_found">Координаты найдены</string>
+    <string name="err_city_not_found">Такой населённый пункт не найден</string>
+    <string name="find">Найти</string>
+    <string name="msg_heat_saved">Записано</string>
+    <string name="enter_heat">Ввести температуру</string>
+    <string name="heat_report">Отчёт по теплу</string>
+    <string name="menu_set_volume">Указать объём воды</string>
 </resources>

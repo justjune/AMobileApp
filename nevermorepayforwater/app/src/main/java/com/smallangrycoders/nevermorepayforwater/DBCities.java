@@ -3,116 +3,217 @@ package com.smallangrycoders.nevermorepayforwater;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class DBCities {
-    private static final String DATABASE_NAME = "cities.db";
-    private static final int DATABASE_VERSION = 1;
-    private static final String TABLE_NAME = "cities";
 
-    private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "name";
-    private static final String COLUMN_TEMPR = "tempr";
-    private static final String COLUMN_LAT = "lat";
-    private static final String COLUMN_LON = "lon";
-    private static final String COLUMN_FLAG2 = "flag2";
-    private static final String COLUMN_SYNCDATE = "syncdate";
 
-    private static final int NUM_COLUMN_ID = 0;
-    private static final int NUM_COLUMN_NAME = 1;
-    private static final int NUM_COLUMN_TEMPR = 2;
-    private static final int NUM_COLUMN_LAT = 3;
-    private static final int NUM_COLUMN_LON = 4;
-    private static final int NUM_COLUMN_FLAG2 = 5;
-    private static final int NUM_COLUMN_SYNCDATE = 6;
+    private static final String TAG          = "DBCities";
+    private static final String DB_NAME      = "cities.db";
+    private static final int    DB_VERSION   = 2;                     // ↑
 
-    private static SQLiteDatabase stcDataBase;
 
-    public DBCities(Context context) {
-        OpenHelper mOpenHelper = new OpenHelper(context);
-        stcDataBase = mOpenHelper.getWritableDatabase();
+    private static final String T_CITIES     = "cities";
+
+    private static final String C_ID         = "id";
+    private static final String C_NAME       = "name";
+    private static final String C_TEMPR      = "tempr";
+    private static final String C_LAT        = "lat";
+    private static final String C_LON        = "lon";
+    private static final String C_FLAG       = "flag2";
+    private static final String C_SYNC       = "syncdate";
+    private static final String C_VOLUME     = "volume_m3_month";     // NEW
+
+    private static final int I_ID    = 0;
+    private static final int I_NAME  = 1;
+    private static final int I_TEMPR = 2;
+    private static final int I_LAT   = 3;
+    private static final int I_LON   = 4;
+    private static final int I_FLAG  = 5;
+    private static final int I_SYNC  = 6;
+    private static final int I_VOL   = 7;
+
+
+    private static final String T_HEAT  = "heat_log";
+
+    private static final String H_ID    = "id";
+    private static final String H_CITY  = "city_id";
+    private static final String H_DATE  = "date";          // YYYY-MM-DD
+    private static final String H_TBAT  = "t_bat";
+    private static final String H_TSRC  = "t_src";
+
+
+    private static SQLiteDatabase db;
+
+    public DBCities(Context ctx) {
+        db = new OpenHelper(ctx.getApplicationContext()).getWritableDatabase();
     }
 
+    public static void insert(String name, String temp,
+                              String lat, String lon,
+                              int flag, LocalDateTime sync) {
+        ContentValues cv = new ContentValues();
+        cv.put(C_NAME,  name);
+        cv.put(C_TEMPR, temp);
+        cv.put(C_LAT,   lat);
+        cv.put(C_LON,   lon);
+        cv.put(C_FLAG,  flag);
+        cv.put(C_SYNC,  String.valueOf(sync));
+        cv.put(C_VOLUME, 0);                          // пока 0
 
-    //methods
-    public static void insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
-        ContentValues cv=new ContentValues();
-        cv.put(COLUMN_NAME, name);
-        cv.put(COLUMN_TEMPR, temp);
-        cv.put(COLUMN_LAT, lat);
-        cv.put(COLUMN_LON,lon);
-        cv.put(COLUMN_FLAG2, flag);
-        cv.put(COLUMN_SYNCDATE, String.valueOf(syncDate));
-        stcDataBase.insert(TABLE_NAME, null, cv);
+        try {
+            db.insertOrThrow(T_CITIES, null, cv);
+        } catch (SQLException ex) {
+            Log.e(TAG, "Insert city error", ex);
+            throw ex;
+        }
     }
 
-    public int update(StCity stc) {
-        ContentValues cv=new ContentValues();
-        cv.put(COLUMN_NAME, stc.getName());
-        cv.put(COLUMN_TEMPR, stc.getTemp());
-        cv.put(COLUMN_LAT, stc.getStrLat());
-        cv.put(COLUMN_LON,stc.getStrLon());
-        cv.put(COLUMN_FLAG2, stc.getFlagResource());
-        cv.put(COLUMN_SYNCDATE,stc.getSyncDate().toString());
+    public int update(StCity st) {
+        ContentValues cv = new ContentValues();
+        cv.put(C_NAME,  st.getName());
+        cv.put(C_TEMPR, st.getTemp());
+        cv.put(C_LAT,   st.getStrLat());
+        cv.put(C_LON,   st.getStrLon());
+        cv.put(C_FLAG,  st.getFlagResource());
+        cv.put(C_SYNC,  st.getSyncDate().toString());
 
-        return stcDataBase.update(TABLE_NAME, cv, COLUMN_ID + " = ?",new String[] { String.valueOf(stc.getId())});
+        return db.update(T_CITIES, cv,
+                C_ID + "=?", new String[]{String.valueOf(st.getId())});
     }
 
     public void deleteAll() {
-        stcDataBase.delete(TABLE_NAME, null, null);
+        db.delete(T_CITIES, null, null);
     }
 
     public ArrayList<StCity> selectAll() {
-        Cursor mCursor = stcDataBase.query(TABLE_NAME, null, null, null, null, null, null);
+        ArrayList<StCity> list = new ArrayList<>();
+        try (Cursor cur = db.query(T_CITIES, null,
+                null, null, null, null, null)) {
 
-        ArrayList<StCity> arr = new ArrayList<StCity>();
-        mCursor.moveToFirst();
-        if (!mCursor.isAfterLast()) {
-            do {
-                long id = mCursor.getLong(NUM_COLUMN_ID);
-                String name = mCursor.getString(NUM_COLUMN_NAME);
-                String temp = mCursor.getString(NUM_COLUMN_TEMPR);
-                String lat = mCursor.getString(NUM_COLUMN_LAT);
-                String lon = mCursor.getString(NUM_COLUMN_LON);
-                int flag = mCursor.getInt(NUM_COLUMN_FLAG2);
-                LocalDateTime syncDate = null;
-                if (!Objects.equals(mCursor.getString(NUM_COLUMN_SYNCDATE), "null")) {
-                    syncDate = LocalDateTime.parse(mCursor.getString(NUM_COLUMN_SYNCDATE));
-                }
-                arr.add(new StCity(id,  name,  temp,  lat , lon ,  flag,  syncDate));
-            } while (mCursor.moveToNext());
+            if (cur.moveToFirst()) {
+                do {
+                    long   id   = cur.getLong(I_ID);
+                    String name = cur.getString(I_NAME);
+                    String temp = cur.getString(I_TEMPR);
+                    String lat  = cur.getString(I_LAT);
+                    String lon  = cur.getString(I_LON);
+                    int    flag = cur.getInt(I_FLAG);
+
+                    LocalDateTime sync = null;
+                    String syncStr = cur.getString(I_SYNC);
+                    if (!Objects.equals(syncStr, "null")) {
+                        sync = LocalDateTime.parse(syncStr);
+                    }
+
+                    list.add(new StCity(id, name, temp, lat, lon, flag, sync));
+
+                } while (cur.moveToNext());
+            }
         }
-        return arr;
+        return list;
     }
-    private class OpenHelper extends SQLiteOpenHelper {
 
-        OpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+    public void setCityVolume(long cityId, double m3PerMonth) {
+        ContentValues cv = new ContentValues();
+        cv.put(C_VOLUME, m3PerMonth);
+        db.update(T_CITIES, cv, C_ID + "=?",
+                new String[]{String.valueOf(cityId)});
+    }
+    public double getCityVolume(long cityId) {
+        try (Cursor c = db.query(T_CITIES,
+                new String[]{C_VOLUME},
+                C_ID + "=?", new String[]{String.valueOf(cityId)},
+                null, null, null)) {
+            if (c.moveToFirst()) return c.getDouble(0);
         }
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            String query = "CREATE TABLE " + TABLE_NAME + " (" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_NAME+ " TEXT, " +
-                    COLUMN_TEMPR + " TEXT, " +
-                    COLUMN_LAT + " TEXT,"+
-                    COLUMN_LON + " TEXT,"+
-                    COLUMN_FLAG2 + " INT,"+
-                    COLUMN_SYNCDATE+" TEXT);";
-            db.execSQL(query);
+        return 0;
+    }
+
+    public void insertHeat(long cityId, LocalDate date,
+                           double tBat, double tSrc) {
+
+        ContentValues cv = new ContentValues();
+        cv.put(H_CITY, cityId);
+        cv.put(H_DATE, date.toString());
+        cv.put(H_TBAT, tBat);
+        cv.put(H_TSRC, tSrc);
+
+        db.insertWithOnConflict(T_HEAT, null, cv,
+                SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public double calcHeat(long cityId, YearMonth ym) {
+
+        String first = ym.atDay(1).toString();
+        String last  = ym.atEndOfMonth().toString();
+
+        double sumDelta = 0;
+
+        try (Cursor cur = db.query(T_HEAT,
+                new String[]{H_TBAT, H_TSRC},
+                H_CITY + "=? AND " + H_DATE + " BETWEEN ? AND ?",
+                new String[]{String.valueOf(cityId), first, last},
+                null, null, null)) {
+
+            while (cur.moveToNext()) {
+                sumDelta += cur.getDouble(0) - cur.getDouble(1);
+            }
         }
 
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        double vMonth   = getCityVolume(cityId);              // м³ / мес
+        int    days     = ym.lengthOfMonth();
+        double vDayLit  = vMonth * 1000 / days;               // литров / день
+
+        return sumDelta * vDayLit;                            // ккал
+    }
+
+
+    private static class OpenHelper extends SQLiteOpenHelper {
+
+        OpenHelper(Context ctx) { super(ctx, DB_NAME, null, DB_VERSION); }
+
+        @Override public void onCreate(SQLiteDatabase db) {
+
+            String createCities = "CREATE TABLE " + T_CITIES + " (" +
+                    C_ID     + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    C_NAME   + " TEXT," +
+                    C_TEMPR  + " TEXT," +
+                    C_LAT    + " TEXT," +
+                    C_LON    + " TEXT," +
+                    C_FLAG   + " INT," +
+                    C_SYNC   + " TEXT," +
+                    C_VOLUME + " REAL DEFAULT 0" +
+                    ");";
+
+            String createHeat = "CREATE TABLE " + T_HEAT + " (" +
+                    H_ID   + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    H_CITY + " INTEGER," +
+                    H_DATE + " TEXT," +
+                    H_TBAT + " REAL," +
+                    H_TSRC + " REAL," +
+                    "UNIQUE(" + H_CITY + "," + H_DATE + ")" +
+                    ");";
+
+            db.execSQL(createCities);
+            db.execSQL(createHeat);
+        }
+
+        @Override public void onUpgrade(SQLiteDatabase db,
+                                        int oldVer, int newVer) {
+            db.execSQL("DROP TABLE IF EXISTS " + T_CITIES);
+            db.execSQL("DROP TABLE IF EXISTS " + T_HEAT);
             onCreate(db);
         }
     }
-
 }
-
