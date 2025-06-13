@@ -23,9 +23,12 @@
     <string name="err_connect">Ошибка связи, не удалось получить данные о погоде.</string>
     <string name="geocoding_base_url">https://maps.googleapis.com/maps/api/geocode/json</string>
     <string name="err_no_results">Город не был найден</string>
-    <string name="searching_location">Поиск координат...</string>
+    <string name="searching_location">Поиск координат…</string>
     <string name="enter_city_name">Введите название требуемого города</string>
     <string name="butSave">Сохранить</string>
     <string name="butCancel">Отмена</string>
-
+    <string name="refreshAll">Обновить все города</string>
+    <string name="no_cities_saved">Нет сохраненных городов</string>
+    <string name="updating_data">Обновляем данные</string>
+    <string name="update_complete">Обновление завершено</string>
 </resources>
