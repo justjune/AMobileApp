@@ -3,6 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.smallangrycoders.nevermorepayforwater">
+	<item android:id="@+id/refreshAll"
+        android:title="@string/refreshAll"
+        android:icon="@drawable/ic_refresh_all"
+        app:showAsAction="always|withText"/>
+
+<item
+    android:id="@+id/menu_heat"
+    android:title="Учёт тепла"
+    android:icon="@android:drawable/ic_menu_edit"
+    android:showAsAction="ifRoom" />
+
+
     <item android:id="@+id/add"
         android:title="@string/add"
         android:icon="@android:drawable/ic_menu_add"/>

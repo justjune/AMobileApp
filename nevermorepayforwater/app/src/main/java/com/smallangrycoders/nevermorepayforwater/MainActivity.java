@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,8 +59,9 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    private void updateList () {
-        adapter.setArrayMyData(stcConnector.selectAll());
+    private void updateList() {
+        states = stcConnector.selectAll();
+        adapter.setArrayMyData(states);
         adapter.notifyDataSetChanged();
     }
     @Override
@@ -70,15 +72,49 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult (i, ADD_ACTIVITY);
                 return true;
             case R.id.deleteAll:
+                if (stcConnector.selectAll().isEmpty()) {
+                    stcConnector.deleteAll();
+                    updateList();
+                    Toast.makeText(this, "Нет данных для удаления", Toast.LENGTH_SHORT).show();
+                }
                 stcConnector.deleteAll();
                 updateList ();
                 return true;
             case R.id.exit:
                 finish();
                 return true;
+            case R.id.refreshAll:
+                if (stcConnector.selectAll().isEmpty()) {
+                    stcConnector.deleteAll();
+                    updateList();
+                    Toast.makeText(this, "Нет данных для обновления", Toast.LENGTH_SHORT).show();
+                }
+                refreshAllCities();
+                updateList();
+                return true;
+            case R.id.menu_heat:
+                startActivity(new Intent(this, HeatEntryActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    private void refreshAllCities() {
+        ArrayList<StCity> cities = stcConnector.selectAll();
+        if (cities.isEmpty()) {
+            Toast.makeText(this, "Нет сохраненных городов", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(this, "Обновляем данные...", Toast.LENGTH_SHORT).show();
+
+        for (StCity city : cities) {
+            sendPOST(city, adapter);
+            city.setSyncDate(LocalDateTime.now());
+        }
+        updateList();
+        Toast.makeText(this, "Готово!", Toast.LENGTH_SHORT).show();
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -94,42 +130,49 @@ public class MainActivity extends AppCompatActivity {
     public void sendPOST(StCity state, StCityAdapter adapter) {
         OkHttpClient client = new OkHttpClient();
         String foreAddr = oContext.getString(R.string.forecast_addr);
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(foreAddr+oContext.getString(R.string.lat_condition)+state.getStrLat()+oContext.getString(R.string.lon_condition)+state.getStrLon()+oContext.getString(R.string.add_condition)).newBuilder();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(foreAddr + oContext.getString(R.string.lat_condition) + state.getStrLat() + oContext.getString(R.string.lon_condition) + state.getStrLon() + oContext.getString(R.string.add_condition)).newBuilder();
         String url = urlBuilder.build().toString();
         Request request = new Request.Builder()
                 .url(url)
                 .cacheControl(new CacheControl.Builder().maxStale(3, TimeUnit.SECONDS).build())
                 .build();
+
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful())
-                    {
+                if (!response.isSuccessful()) {
+                    String errorMessage = "Ошибка: " + response.code();
                     MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(oContext.getString(R.string.err_text));
+                        state.setTemp(errorMessage);
                         adapter.notifyDataSetChanged();
                         stcConnector.update(state);
                     });
-                    }
-                else
-                    {
+                } else {
                     final String responseData = response.body().string();
                     JSONObject jo;
                     try {
                         jo = new JSONObject(responseData);
-                        }
-                    catch (JSONException e)
-                        {
-                            throw new RuntimeException(e);
-                        }
+                    } catch (JSONException e) {
+                        MainActivity.this.runOnUiThread(() -> {
+                            state.setTemp(oContext.getString(R.string.errJsonParse));
+                            adapter.notifyDataSetChanged();
+                            stcConnector.update(state);
+                        });
+                        return;
+                    }
+
                     String tempFromAPI;
                     try {
-                        tempFromAPI =  jo.getJSONObject(oContext.getString(R.string.cur_weather)).get(oContext.getString(R.string.temperature)).toString();
-                        }
-                    catch (JSONException e)
-                        {
-                        throw new RuntimeException(e);
-                        }
+                        tempFromAPI = jo.getJSONObject(oContext.getString(R.string.cur_weather)).get(oContext.getString(R.string.temperature)).toString();
+                    } catch (JSONException e) {
+                        MainActivity.this.runOnUiThread(() -> {
+                            state.setTemp(oContext.getString(R.string.errMissingData));
+                            adapter.notifyDataSetChanged();
+                            stcConnector.update(state);
+                        });
+                        return;
+                    }
+
                     MainActivity.this.runOnUiThread(() -> {
                         state.setTemp(tempFromAPI);
                         adapter.notifyDataSetChanged();
@@ -137,18 +180,16 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             }
+
             @Override
             public void onFailure(Call call, IOException e) {
                 MainActivity.this.runOnUiThread(() -> {
-                    state.setTemp(String.valueOf(R.string.err_connect));
+                    state.setTemp(oContext.getString(R.string.err_connect));
                     adapter.notifyDataSetChanged();
                     stcConnector.update(state);
                 });
-
                 e.printStackTrace();
             }
-
         });
     }
-
 }
