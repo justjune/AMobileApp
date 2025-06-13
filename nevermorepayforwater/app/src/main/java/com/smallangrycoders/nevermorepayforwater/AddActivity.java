@@ -22,6 +22,7 @@ public class AddActivity extends Activity {
         btSave=(Button)findViewById(R.id.butSave);
         btCancel=(Button)findViewById(R.id.butCancel);
         btLookup=(Button)findViewById(R.id.butLookup);
+
         etLoc=(EditText)findViewById(R.id.City);
         etLat=(EditText)findViewById(R.id.etLat);
         etLon=(EditText)findViewById(R.id.etLon);
@@ -42,16 +43,17 @@ public class AddActivity extends Activity {
 
                         @Override
                         public void onFailure(String error) {
+
                             runOnUiThread(() -> {
                                 Toast.makeText(AddActivity.this,
-                                        "Could not get coordinates: " + error,
+                                        getString(R.string.noSuchLoc) + " " + error ,
                                         Toast.LENGTH_LONG).show();
                             });
                         }
                     });
                 } else {
                     Toast.makeText(AddActivity.this,
-                            "Please enter a location name first",
+                            R.string.enterName,
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -60,7 +62,32 @@ public class AddActivity extends Activity {
         btSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StCity stcity=new StCity(-1,etLoc.getText().toString(),"0", etLat.getText().toString(), etLon.getText().toString(), 1, LocalDateTime.now());
+                String lat = etLat.getText().toString();
+                String lon = etLon.getText().toString();
+
+                try {
+                    double latValue = Double.parseDouble(lat);
+                    double lonValue = Double.parseDouble(lon);
+                    if (latValue < -90.0 || latValue > 90.0) {
+                        Toast.makeText(AddActivity.this,
+                                R.string.wrongCoord,
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    };
+                    if (lonValue < -180.0 || lonValue > 180.0) {
+                        Toast.makeText(AddActivity.this,
+                                R.string.wrongCoord,
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    // Если строки не могут быть преобразованы в число
+                    Toast.makeText(AddActivity.this,
+                            R.string.wrongCoord,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                StCity stcity=new StCity(-1,etLoc.getText().toString(),"0", lat, lon, 1, LocalDateTime.now());
                 Intent intent=getIntent();
                 intent.putExtra("StCity", stcity);
                 setResult(RESULT_OK,intent);
