@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.time.LocalDateTime;
 
@@ -36,7 +37,15 @@ public class AddActivity extends Activity {
         buttonCancel = findViewById(R.id.butCancel);
 
         buttonSave.setOnClickListener(v -> {
-            City city = new City(-1, editTextCityName.getText().toString(), "0", editTextLatitude.getText().toString(), editTextLongitude.getText().toString(), 1, LocalDateTime.now());
+            String cityName = editTextCityName.getText().toString();
+            String latitude = editTextLatitude.getText().toString();
+            String longitude = editTextLongitude.getText().toString();
+
+            if (!validateFields(cityName, latitude, longitude)) {
+                return;
+            }
+
+            City city = new City(-1, cityName, "0", latitude, longitude, 1, LocalDateTime.now());
             Intent intent = getIntent();
             intent.putExtra(CITY_CODE, city);
             setResult(RESULT_OK, intent);
@@ -48,6 +57,15 @@ public class AddActivity extends Activity {
         });
     }
 
+    private boolean validateFields(String cityName, String latitude, String longitude) {
+        if (!cityName.isEmpty() && !latitude.isEmpty() && !longitude.isEmpty()) {
+            return true;
+        }
+
+        Toast.makeText(AddActivity.this, "Необходимо заполнить все поля", Toast.LENGTH_SHORT).show();
+        return false;
+    }
+
     private void initEditTexts() {
         editTextCityName = findViewById(R.id.editTextCityName);
         editTextLatitude = findViewById(R.id.editTextLatitude);
@@ -57,12 +75,12 @@ public class AddActivity extends Activity {
 
         if (extras != null) {
             String cityName = extras.getString(CITY_NAME_CODE);
-            String latitude = extras.getString(LATITUDE_CODE);
-            String longitude = extras.getString(LONGITUDE_CODE);
+            Double latitude = extras.getDouble(LATITUDE_CODE);
+            Double longitude = extras.getDouble(LONGITUDE_CODE);
 
             editTextCityName.setText(cityName);
-            editTextLatitude.setText(latitude);
-            editTextLongitude.setText(longitude);
+            editTextLatitude.setText(latitude.toString());
+            editTextLongitude.setText(longitude.toString());
         }
     }
 }

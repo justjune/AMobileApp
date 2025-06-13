@@ -42,10 +42,9 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityItemViewHo
         position = holder.getAdapterPosition();
 
         City city = cities.get(position);
-        String temperature = this.context.getString(R.string.tempro);
 
         holder.textViewCityName.setText(city.getName());
-        holder.textViewTemperature.setText(temperature + city.getTemp() + "℃");
+        holder.textViewTemperature.setText(city.getTemp() + "℃");
 
         if (city.getDateTime() != null) {
             String refreshed = this.context.getString(R.string.refreshed);

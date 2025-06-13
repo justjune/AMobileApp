@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             City city = (City) data.getExtras().getSerializable(AddActivity.CITY_CODE);
             dbCities.insert(city.getName(), city.getTemp(), city.getLatitude(), city.getLongtitude(), city.getFlagResource(), city.getDateTime());
+            sendPOST(city, cityAdapter);
             updateList();
         }
     }
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                             intent.putExtra(AddActivity.CITY_NAME_CODE, cityName);
                             intent.putExtra(AddActivity.LATITUDE_CODE, latitude);
                             intent.putExtra(AddActivity.LONGITUDE_CODE, longitude);
-                            startActivity(intent);
+                            startActivityForResult(intent, 2);
                         });
                     } else {
                         runOnUiThread(() -> {
