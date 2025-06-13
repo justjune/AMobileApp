@@ -28,4 +28,5 @@
     <string name="geocode_failed">Ошибка геокодирования</string>
     <string name="location_not_found">Местоположение не найдено</string>
     <string name="parse_error">Ошибка обработки данных</string>
+    <string name="input_temp">Температура батареи</string>
 </resources>

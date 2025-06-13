@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -45,22 +46,23 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.list);
         oContext=this;
         stcConnector=new DBCities(this);
-        adapter = new StCityAdapter(this, stcConnector.selectAll(), null, oContext);
+        adapter = new StCityAdapter(this, stcConnector.selectAll(), null);
         StCityAdapter.OnStCityClickListener stateClickListener = (state, position) -> {
 
-           sendPOST(state, adapter);
-            state.setSyncDate(LocalDateTime.now());
-
+            sendPOST(state, adapter);
         };
+
        adapter.SetOnCl(stateClickListener);
+
        recyclerView.setAdapter(adapter);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    private void updateList () {
+    private void updateList() {
         adapter.setArrayMyData(stcConnector.selectAll());
         adapter.notifyDataSetChanged();
     }
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             StCity st = (StCity) data.getExtras().getSerializable("StCity");
-            stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(), st.getFlagResource(), st.getSyncDate());
+            stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(), st.getFlagResource(), st.getSyncDate(), new ArrayList<String>());
             updateList();
 
         }
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(String temperature) {
                 runOnUiThread(() -> {
                     state.setTemp(temperature);
-                    state.setSyncDate(LocalDateTime.now());
                     adapter.notifyDataSetChanged();
                     stcConnector.update(state);
                 });

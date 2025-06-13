@@ -9,6 +9,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 public class AddActivity extends Activity {
     private Button btSave,btCancel, btLookup;
     private EditText etLoc,etLat,etLon;
@@ -87,7 +90,7 @@ public class AddActivity extends Activity {
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
-                StCity stcity=new StCity(-1,etLoc.getText().toString(),"0", lat, lon, 1, LocalDateTime.now());
+                StCity stcity=new StCity(-1, etLoc.getText().toString(), "0", lat, lon, 1, null, new ArrayList<String>(), "0");
                 Intent intent=getIntent();
                 intent.putExtra("StCity", stcity);
                 setResult(RESULT_OK,intent);

@@ -9,12 +9,14 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-private static final String USER_AGENT = "NeverMorePayForWater/1.0";
+//private static final String USER_AGENT = ;
 
 public class ApiService {
     private OkHttpClient client;
@@ -101,7 +103,7 @@ public class ApiService {
 
         Request request = new Request.Builder()
                 .url(urlBuilder.build())
-                .header("User-Agent", USER_AGENT)
+                .header("User-Agent", "NeverMorePayForWater/1.0")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
