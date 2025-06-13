@@ -20,6 +20,12 @@
     <string name="location">Локация</string>
     <string name="tvLat">Широта</string>
     <string name="tvLon">Долгота</string>
-    <string name="err_connect">Ошибка связи, погоды не будет.</string>
+    <string name="err_connect">Ошибка связи, не удалось получить данные о погоде.</string>
+    <string name="geocoding_base_url">https://maps.googleapis.com/maps/api/geocode/json</string>
+    <string name="err_no_results">Город не был найден</string>
+    <string name="searching_location">Поиск координат...</string>
+    <string name="enter_city_name">Введите название требуемого города</string>
+    <string name="butSave">Сохранить</string>
+    <string name="butCancel">Отмена</string>
 
 </resources>
