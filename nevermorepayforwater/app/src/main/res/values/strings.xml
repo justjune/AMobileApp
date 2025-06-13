@@ -25,4 +25,7 @@
     <string name="noSuchLoc">Не удалось найти локацию: </string>
     <string name="wrongCoord">Неверные координаты</string>
     <string name="enterName">Введите название</string>
+    <string name="geocode_failed">Ошибка геокодирования</string>
+    <string name="location_not_found">Местоположение не найдено</string>
+    <string name="parse_error">Ошибка обработки данных</string>
 </resources>

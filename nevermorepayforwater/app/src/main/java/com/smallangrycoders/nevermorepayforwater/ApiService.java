@@ -14,6 +14,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+private static final String USER_AGENT = "NeverMorePayForWater/1.0";
+
 public class ApiService {
     private OkHttpClient client;
     private Context context;
@@ -92,16 +94,40 @@ public class ApiService {
     }
 
     public void getCoordinates(String locationName, GeocodingCallback callback) {
-        // TODO: реализовать реальные запросы
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://nominatim.openstreetmap.org/search").newBuilder()
+                .addQueryParameter("q", locationName)
+                .addQueryParameter("format", "json")
+                .addQueryParameter("limit", "1");
 
-        if (locationName.toLowerCase().contains("london")) {
-            callback.onSuccess("51.5074", "-0.1278");
-        } else if (locationName.toLowerCase().contains("paris")) {
-            callback.onSuccess("48.8566", "2.3522");
-        } else if (locationName.toLowerCase().contains("new york")) {
-            callback.onSuccess("40.7128", "-74.0060");
-        } else {
-            callback.onFailure("Geocoding service not implemented");
-        }
+        Request request = new Request.Builder()
+                .url(urlBuilder.build())
+                .header("User-Agent", USER_AGENT)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(context.getString(R.string.geocode_failed) + ": " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String responseData = response.body().string();
+                    JSONArray jsonArray = new JSONArray(responseData);
+                    if (jsonArray.length() > 0) {
+                        JSONObject firstResult = jsonArray.getJSONObject(0);
+                        String lat = firstResult.getString("lat");
+                        String lon = firstResult.getString("lon");
+                        callback.onSuccess(lat, lon);
+                    } else {
+                        callback.onFailure(context.getString(R.string.location_not_found));
+                    }
+                } catch (JSONException e) {
+                    callback.onFailure(context.getString(R.string.parse_error));
+                }
+            }
+        });
     }
+
 }
