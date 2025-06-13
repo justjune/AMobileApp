@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class DBCities {
     private static final String DATABASE_NAME = "cities.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String TABLE_NAME = "cities";
 
     private static final String COLUMN_ID = "id";
@@ -45,8 +45,6 @@ public class DBCities {
         stcDataBase = mOpenHelper.getWritableDatabase();
     }
 
-
-    //methods
     public static void insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
         ContentValues cv=new ContentValues();
         cv.put(COLUMN_NAME, name);
@@ -58,14 +56,14 @@ public class DBCities {
         stcDataBase.insert(TABLE_NAME, null, cv);
     }
 
-    public int update(StCity stc) {
+    public int update(City stc) {
         ContentValues cv=new ContentValues();
         cv.put(COLUMN_NAME, stc.getName());
         cv.put(COLUMN_TEMPR, stc.getTemp());
         cv.put(COLUMN_LAT, stc.getLatitude());
         cv.put(COLUMN_LON,stc.getLongtitude());
         cv.put(COLUMN_FLAG2, stc.getFlagResource());
-        cv.put(COLUMN_SYNCDATE,stc.getSyncDate().toString());
+        cv.put(COLUMN_SYNCDATE,stc.getDateTime().toString());
 
         return stcDataBase.update(TABLE_NAME, cv, COLUMN_ID + " = ?",new String[] { String.valueOf(stc.getId())});
     }
@@ -94,14 +92,10 @@ public class DBCities {
         return records;
     }
 
-    public void deleteAll() {
-        stcDataBase.delete(TABLE_NAME, null, null);
-    }
-
-    public ArrayList<StCity> selectAll() {
+    public ArrayList<City> selectAll() {
         Cursor mCursor = stcDataBase.query(TABLE_NAME, null, null, null, null, null, null);
 
-        ArrayList<StCity> arr = new ArrayList<StCity>();
+        ArrayList<City> arr = new ArrayList<City>();
         mCursor.moveToFirst();
         if (!mCursor.isAfterLast()) {
             do {
@@ -115,7 +109,7 @@ public class DBCities {
                 if (!Objects.equals(mCursor.getString(NUM_COLUMN_SYNCDATE), "null")) {
                     syncDate = LocalDateTime.parse(mCursor.getString(NUM_COLUMN_SYNCDATE));
                 }
-                arr.add(new StCity(id,  name,  temp,  lat , lon ,  flag,  syncDate));
+                arr.add(new City(id,  name,  temp,  lat , lon ,  flag,  syncDate));
             } while (mCursor.moveToNext());
         }
         return arr;

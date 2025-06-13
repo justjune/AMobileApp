@@ -14,36 +14,53 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class HeatActivity extends AppCompatActivity {
-    private EditText etTempIn, etTempOut, etVolume;
-    private Button btnSave, btnShowStats;
-    private TextView tvResult;
-    private DBCities db;
+    private EditText editTextTempIn;
+    private EditText editTextTempOut;
+    private EditText editTextVolume;
+
+    private Button buttonSave;
+    private Button buttonShowStats;
+
+    private TextView textViewResult;
+    private DBCities dbCities;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heat);
 
-        db = new DBCities(this);
+        dbCities = new DBCities(this);
 
-        etTempIn = findViewById(R.id.etTempIn);
-        etTempOut = findViewById(R.id.etTempOut);
-        etVolume = findViewById(R.id.etVolume);
-        btnSave = findViewById(R.id.btnSaveHeatData);
-        btnShowStats = findViewById(R.id.btnShowStats);
-        tvResult = findViewById(R.id.tvHeatResult);
+        initEditTexts();
+        initButtons();
+    }
 
-        btnSave.setOnClickListener(v -> saveHeatData());
-        btnShowStats.setOnClickListener(v -> showStatistics());
+    private void initEditTexts() {
+        editTextTempIn = findViewById(R.id.editTextTempIn);
+        editTextTempOut = findViewById(R.id.editTextTempOut);
+        editTextVolume = findViewById(R.id.etVolume);
+    }
+
+    private void initButtons() {
+        buttonSave = findViewById(R.id.btnSaveHeatData);
+        buttonShowStats = findViewById(R.id.btnShowStats);
+        textViewResult = findViewById(R.id.tvHeatResult);
+
+        buttonSave.setOnClickListener(v -> {
+            saveHeatData();
+        });
+        buttonShowStats.setOnClickListener(v -> {
+            showStatistics();
+        });
     }
 
     private void saveHeatData() {
         try {
-            double tempIn = Double.parseDouble(etTempIn.getText().toString());
-            double tempOut = Double.parseDouble(etTempOut.getText().toString());
-            double volume = Double.parseDouble(etVolume.getText().toString());
+            double tempIn = Double.parseDouble(editTextTempIn.getText().toString());
+            double tempOut = Double.parseDouble(editTextTempOut.getText().toString());
+            double volume = Double.parseDouble(editTextVolume.getText().toString());
 
-            db.insertHeatData(LocalDateTime.now(), tempIn, tempOut, volume);
+            dbCities.insertHeatData(LocalDateTime.now(), tempIn, tempOut, volume);
 
             Toast.makeText(this, "Данные сохранены", Toast.LENGTH_SHORT).show();
             calculateHeat(tempIn, tempOut, volume);
@@ -53,15 +70,15 @@ public class HeatActivity extends AppCompatActivity {
     }
 
     private void calculateHeat(double tempIn, double tempOut, double volume) {
-        double heat = volume * 1000 * (tempIn - tempOut); // Переводим м³ в литры
+        double heat = volume * 1000 * (tempIn - tempOut);
         String result = String.format("Расход тепла: %.2f ккал", heat);
-        tvResult.setText(result);
+        textViewResult.setText(result);
     }
 
     private void showStatistics() {
-        List<HeatRecord> records = db.getAllHeatData();
+        List<HeatRecord> records = dbCities.getAllHeatData();
         if (records.isEmpty()) {
-            tvResult.setText("Нет данных для отображения");
+            textViewResult.setText("Нет данных");
             return;
         }
 
@@ -79,6 +96,6 @@ public class HeatActivity extends AppCompatActivity {
         }
 
         stats.append(String.format("\nИтого: %.2f ккал", totalHeat));
-        tvResult.setText(stats.toString());
+        textViewResult.setText(stats.toString());
     }
 }

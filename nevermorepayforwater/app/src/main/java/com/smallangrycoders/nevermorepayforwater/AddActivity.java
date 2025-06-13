@@ -3,41 +3,66 @@ package com.smallangrycoders.nevermorepayforwater;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import java.time.LocalDateTime;
-public class AddActivity extends Activity {
-    private Button btSave,btCancel;
-    private EditText etLoc,etLat,etLon;
 
+import java.time.LocalDateTime;
+
+public class AddActivity extends Activity {
+
+    public static final String CITY_CODE = "ADD_ACTIVITY_CITY";
+    public static final String CITY_NAME_CODE = "ADD_ACTIVITY_CITY_NAME";
+    public static final String LATITUDE_CODE = "ADD_ACTIVITY_LATITUDE";
+    public static final String LONGITUDE_CODE = "ADD_ACTIVITY_LONGITUDE";
+
+    private Button buttonSave;
+    private Button buttonCancel;
+
+    private EditText editTextCityName;
+    private EditText editTextLatitude;
+    private EditText editTextLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_activity);
-        btSave=(Button)findViewById(R.id.butSave);
-        btCancel=(Button)findViewById(R.id.butCancel);
-        etLoc=(EditText)findViewById(R.id.City);
-        etLat=(EditText)findViewById(R.id.etLat);
-        etLon=(EditText)findViewById(R.id.etLon);
 
-        btSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                StCity stcity=new StCity(-1,etLoc.getText().toString(),"0", etLat.getText().toString(), etLon.getText().toString(), 1, LocalDateTime.now());
-                Intent intent=getIntent();
-                intent.putExtra("StCity", stcity);
-                setResult(RESULT_OK,intent);
-                finish();
-            }
+        initEditTexts();
+        initButtons();
+    }
+
+    private void initButtons() {
+        buttonSave = findViewById(R.id.butSave);
+        buttonCancel = findViewById(R.id.butCancel);
+
+        buttonSave.setOnClickListener(v -> {
+            City city = new City(-1, editTextCityName.getText().toString(), "0", editTextLatitude.getText().toString(), editTextLongitude.getText().toString(), 1, LocalDateTime.now());
+            Intent intent = getIntent();
+            intent.putExtra(CITY_CODE, city);
+            setResult(RESULT_OK, intent);
+            finish();
         });
 
-        btCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
+        buttonCancel.setOnClickListener(v -> {
+            finish();
         });
+    }
+
+    private void initEditTexts() {
+        editTextCityName = findViewById(R.id.editTextCityName);
+        editTextLatitude = findViewById(R.id.editTextLatitude);
+        editTextLongitude = findViewById(R.id.editTextLongitude);
+
+        Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            String cityName = extras.getString(CITY_NAME_CODE);
+            String latitude = extras.getString(LATITUDE_CODE);
+            String longitude = extras.getString(LONGITUDE_CODE);
+
+            editTextCityName.setText(cityName);
+            editTextLatitude.setText(latitude);
+            editTextLongitude.setText(longitude);
+        }
     }
 }

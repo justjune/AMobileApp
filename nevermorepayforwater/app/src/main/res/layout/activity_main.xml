@@ -25,6 +25,15 @@
         android:textColor="#FFFFFF" />
 
     <Button
+        android:id="@+id/btnFindCityByCoordinates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Найти город по координатам"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="#3F51B5"
+        android:textColor="#FFFFFF" />
+
+    <Button
         android:id="@+id/btnHeatCalculator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
