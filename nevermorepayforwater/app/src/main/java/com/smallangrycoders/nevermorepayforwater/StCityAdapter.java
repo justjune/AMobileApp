@@ -2,6 +2,7 @@ package com.smallangrycoders.nevermorepayforwater;
 
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,11 +52,11 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
         holder.nameView.setText(state.getName());
 
         String tempro = this.context.getString(R.string.tempro);
-        holder.tempView.setText(tempro+ state.getTemp());
+        holder.tempView.setText(tempro + " " + state.getTemp());
 
         if (state.getSyncDate()!= null){
             String refreshed = this.context.getString(R.string.refreshed);
-            holder.syncDateView.setText(refreshed+state.getSyncDate().format(formatq));
+            holder.syncDateView.setText(refreshed + " " + state.getSyncDate().format(formatq));
         }
 
         int finalPosition = position;
@@ -63,12 +64,28 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
             @Override
             public void onClick(View v)
             {
-                 onClickListener.onStCityClick(state, finalPosition);
+                onClickListener.onStCityClick(state, finalPosition);
                 if (state.getSyncDate()!= null){
                     holder.tempView.setText(R.string.refresh_data);
                     holder.syncDateView.setText(R.string.refresh_data);
                 }
             }
+        });
+
+        int finalPosition1 = position;
+        holder.itemView.setOnLongClickListener(v -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Удалить " + state.getName() + "?")
+                    .setMessage("Вы уверены, что хотите удалить этот населенный пункт?")
+                    .setPositiveButton("Удалить", (dialog, which) -> {
+                        DBCities db = new DBCities(context);
+                        db.delete(state.getId());
+                        states.remove(finalPosition1);
+                        notifyItemRemoved(finalPosition1);
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
+            return true;
         });
     }
 
