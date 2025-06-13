@@ -14,4 +14,9 @@
     <item android:id="@+id/exit"
         android:title="@string/exit"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
+
+    <item android:id="@+id/refreshAll"
+        android:title="@string/refreshAll"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="always|withText"/>
 </menu>
