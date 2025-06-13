@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -12,14 +13,16 @@
         android:autofillHints=""
         android:hint="@string/enter_city_name"
         android:inputType="text"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        tools:ignore="VisualLintTextFieldSize" />
 
     <Button
         android:id="@+id/butSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/searching_location"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        tools:ignore="VisualLintButtonSize" />
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -42,7 +45,8 @@
         android:autofillHints=""
         android:inputType="numberDecimal|numberSigned"
         android:enabled="false"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        tools:ignore="VisualLintTextFieldSize" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -57,7 +61,8 @@
         android:autofillHints=""
         android:inputType="numberDecimal|numberSigned"
         android:enabled="false"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="24dp"
+        tools:ignore="VisualLintTextFieldSize" />
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
@@ -72,7 +77,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/butSave"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            tools:ignore="VisualLintButtonSize" />
 
         <Button
             android:id="@+id/butCancel"
@@ -80,7 +86,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/butCancel"/>
+            android:text="@string/butCancel"
+            tools:ignore="VisualLintButtonSize" />
 
     </LinearLayout>
 
