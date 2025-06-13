@@ -7,15 +7,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
-public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolder>{
-
-
-    interface OnStCityClickListener{
+public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder> {
+    interface OnStCityClickListener {
         void onStCityClick(StCity state, int position);
     }
 
@@ -33,16 +33,22 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
         this.context = context1;
     }
 
-    public void SetOnCl(OnStCityClickListener onClickListener){ this.onClickListener = onClickListener;}
+    public void SetOnCl(OnStCityClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = inflater.inflate(R.layout.list_item, parent, false);
         return new ViewHolder(view);
     }
+
     public void setArrayMyData(List<StCity> arrayMyData) {
-        this.states = arrayMyData;
+        this.states = new ArrayList<>(arrayMyData);
+        notifyDataSetChanged();
     }
+
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
@@ -50,24 +56,28 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
         StCity state = states.get(position);
         holder.nameView.setText(state.getName());
 
-        String tempro = this.context.getString(R.string.tempro);
-        holder.tempView.setText(tempro+ state.getTemp());
+        if (state.getTemp().startsWith(context.getString(R.string.err_no_internet)) ||
+                state.getTemp().startsWith(context.getString(R.string.err_connection_failed))) {
+            holder.tempView.setText(state.getTemp());
+        } else {
+            holder.tempView.setText(String.format(context.getString(R.string.tempro), state.getTemp()));
+        }
 
-        if (state.getSyncDate()!= null){
+        if (state.getSyncDate() != null) {
+            holder.syncDateView.setVisibility(View.VISIBLE);
             String refreshed = this.context.getString(R.string.refreshed);
-            holder.syncDateView.setText(refreshed+state.getSyncDate().format(formatq));
+            holder.syncDateView.setText(refreshed + state.getSyncDate().format(formatq));
+        } else {
+            holder.syncDateView.setVisibility(View.GONE);
         }
 
         int finalPosition = position;
-        holder.itemView.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v)
-            {
-                 onClickListener.onStCityClick(state, finalPosition);
-                if (state.getSyncDate()!= null){
-                    holder.tempView.setText(R.string.refresh_data);
-                    holder.syncDateView.setText(R.string.refresh_data);
-                }
+        holder.itemView.setOnClickListener(v -> {
+            onClickListener.onStCityClick(state, finalPosition);
+
+            if (state.getSyncDate() != null) {
+                holder.tempView.setText(R.string.refresh_data);
+                holder.syncDateView.setText(R.string.refresh_data);
             }
         });
     }
@@ -77,11 +87,11 @@ public class StCityAdapter  extends RecyclerView.Adapter<StCityAdapter.ViewHolde
         return states.size();
     }
 
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         final TextView nameView, tempView, syncDateView;
-        ViewHolder(View view){
+
+        ViewHolder(View view) {
             super(view);
             nameView = view.findViewById(R.id.name);
             tempView = view.findViewById(R.id.temp);

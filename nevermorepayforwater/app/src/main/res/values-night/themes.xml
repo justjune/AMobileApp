@@ -1,16 +1,55 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Nevermorepayforwater" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+<resources>
+    <!-- Dark theme -->
+    <style name="Theme.Nevermorepayforwater" parent="Theme.MaterialComponents">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/dark_primary</item>
+        <item name="colorPrimaryVariant">@color/dark_primary_variant</item>
+        <item name="colorOnPrimary">@color/dark_on_primary</item>
+
+        <!-- Backgrounds -->
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="android:colorBackground">@color/dark_background</item>
+        <item name="android:statusBarColor">@color/dark_primary_variant</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/dark_text_primary</item>
+        <item name="android:textColorSecondary">@color/dark_text_secondary</item>
+
+        <item name="cardViewStyle">@style/CardView.Dark</item>
+        <item name="materialButtonStyle">@style/Button.Dark</item>
+        <item name="textInputStyle">@style/TextInput.Dark</item>
+        <item name="materialButtonOutlinedStyle">@style/Button.Outlined.Dark</item>
+        <item name="buttonStyle">@style/Button.Dark</item>
+    </style>
+
+    <style name="CardView.Dark" parent="CardView">
+        <item name="cardBackgroundColor">@color/dark_card</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">8dp</item>
+    </style>
+
+    <style name="Button.Outlined.Dark" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/dark_primary</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/dark_primary</item>
+        <item name="backgroundTint">@color/dark_card</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="Button.Dark" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/dark_primary</item>
+        <item name="android:textColor">@color/dark_on_primary</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="TextInput.Dark" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/dark_surface</item>
+        <item name="boxStrokeColor">@color/dark_primary</item>
+        <item name="hintTextColor">@color/dark_primary</item>
+        <item name="android:textColorHint">@color/dark_text_hint</item>
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
     </style>
 </resources>

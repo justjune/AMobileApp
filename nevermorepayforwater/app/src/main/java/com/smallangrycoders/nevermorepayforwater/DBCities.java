@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,29 +40,41 @@ public class DBCities {
         stcDataBase = mOpenHelper.getWritableDatabase();
     }
 
+    public long insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
+        if (stcDataBase == null || !stcDataBase.isOpen()) {
+            Log.e("DBCities", "Database is not available");
+            return -1;
+        }
 
-    //methods
-    public static void insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
-        ContentValues cv=new ContentValues();
-        cv.put(COLUMN_NAME, name);
-        cv.put(COLUMN_TEMPR, temp);
-        cv.put(COLUMN_LAT, lat);
-        cv.put(COLUMN_LON,lon);
-        cv.put(COLUMN_FLAG2, flag);
-        cv.put(COLUMN_SYNCDATE, String.valueOf(syncDate));
-        stcDataBase.insert(TABLE_NAME, null, cv);
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(COLUMN_NAME, name);
+            cv.put(COLUMN_TEMPR, temp);
+            cv.put(COLUMN_LAT, lat);
+            cv.put(COLUMN_LON, lon);
+            cv.put(COLUMN_FLAG2, flag);
+            cv.put(COLUMN_SYNCDATE, syncDate != null ? syncDate.toString() : null);
+
+            return stcDataBase.insert(TABLE_NAME, null, cv);
+        } catch (SQLiteException e) {
+            Log.e("DBCities", "Database error", e);
+            return -1;
+        } catch (Exception e) {
+            Log.e("DBCities", "Unexpected error", e);
+            return -1;
+        }
     }
 
     public int update(StCity stc) {
-        ContentValues cv=new ContentValues();
+        ContentValues cv = new ContentValues();
         cv.put(COLUMN_NAME, stc.getName());
         cv.put(COLUMN_TEMPR, stc.getTemp());
         cv.put(COLUMN_LAT, stc.getStrLat());
-        cv.put(COLUMN_LON,stc.getStrLon());
+        cv.put(COLUMN_LON, stc.getStrLon());
         cv.put(COLUMN_FLAG2, stc.getFlagResource());
-        cv.put(COLUMN_SYNCDATE,stc.getSyncDate().toString());
+        cv.put(COLUMN_SYNCDATE, stc.getSyncDate().toString());
 
-        return stcDataBase.update(TABLE_NAME, cv, COLUMN_ID + " = ?",new String[] { String.valueOf(stc.getId())});
+        return stcDataBase.update(TABLE_NAME, cv, COLUMN_ID + " = ?", new String[]{String.valueOf(stc.getId())});
     }
 
     public void deleteAll() {
@@ -84,26 +98,27 @@ public class DBCities {
                 if (!Objects.equals(mCursor.getString(NUM_COLUMN_SYNCDATE), "null")) {
                     syncDate = LocalDateTime.parse(mCursor.getString(NUM_COLUMN_SYNCDATE));
                 }
-                arr.add(new StCity(id,  name,  temp,  lat , lon ,  flag,  syncDate));
+                arr.add(new StCity(id, name, temp, lat, lon, flag, syncDate));
             } while (mCursor.moveToNext());
         }
         return arr;
     }
-    private class OpenHelper extends SQLiteOpenHelper {
 
+    private class OpenHelper extends SQLiteOpenHelper {
         OpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
+
         @Override
         public void onCreate(SQLiteDatabase db) {
             String query = "CREATE TABLE " + TABLE_NAME + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_NAME+ " TEXT, " +
+                    COLUMN_NAME + " TEXT, " +
                     COLUMN_TEMPR + " TEXT, " +
-                    COLUMN_LAT + " TEXT,"+
-                    COLUMN_LON + " TEXT,"+
-                    COLUMN_FLAG2 + " INT,"+
-                    COLUMN_SYNCDATE+" TEXT);";
+                    COLUMN_LAT + " TEXT," +
+                    COLUMN_LON + " TEXT," +
+                    COLUMN_FLAG2 + " INT," +
+                    COLUMN_SYNCDATE + " TEXT);";
             db.execSQL(query);
         }
 
@@ -113,6 +128,4 @@ public class DBCities {
             onCreate(db);
         }
     }
-
 }
-
