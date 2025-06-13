@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     StCityAdapter adapter;
     int ADD_ACTIVITY = 0;
 
+    private ApiService apiService = ApiService.getInstance(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,22 +46,23 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.list);
         oContext=this;
         stcConnector=new DBCities(this);
-        adapter = new StCityAdapter(this, stcConnector.selectAll(), null, oContext);
+        adapter = new StCityAdapter(this, stcConnector.selectAll(), null);
         StCityAdapter.OnStCityClickListener stateClickListener = (state, position) -> {
 
-           sendPOST(state, adapter);
-            state.setSyncDate(LocalDateTime.now());
-
+            sendPOST(state, adapter);
         };
+
        adapter.SetOnCl(stateClickListener);
+
        recyclerView.setAdapter(adapter);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-    private void updateList () {
+    private void updateList() {
         adapter.setArrayMyData(stcConnector.selectAll());
         adapter.notifyDataSetChanged();
     }
@@ -86,68 +90,31 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             StCity st = (StCity) data.getExtras().getSerializable("StCity");
-            stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(), st.getFlagResource(), st.getSyncDate());
+            stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(), st.getFlagResource(), st.getSyncDate(), new ArrayList<String>());
             updateList();
 
         }
     }
     public void sendPOST(StCity state, StCityAdapter adapter) {
-        OkHttpClient client = new OkHttpClient();
-        String foreAddr = oContext.getString(R.string.forecast_addr);
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(foreAddr+oContext.getString(R.string.lat_condition)+state.getStrLat()+oContext.getString(R.string.lon_condition)+state.getStrLon()+oContext.getString(R.string.add_condition)).newBuilder();
-        String url = urlBuilder.build().toString();
-        Request request = new Request.Builder()
-                .url(url)
-                .cacheControl(new CacheControl.Builder().maxStale(3, TimeUnit.SECONDS).build())
-                .build();
-        client.newCall(request).enqueue(new Callback() {
+
+        apiService.getWeather(state, new ApiService.WeatherCallback() {
             @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful())
-                    {
-                    MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(oContext.getString(R.string.err_text));
-                        adapter.notifyDataSetChanged();
-                        stcConnector.update(state);
-                    });
-                    }
-                else
-                    {
-                    final String responseData = response.body().string();
-                    JSONObject jo;
-                    try {
-                        jo = new JSONObject(responseData);
-                        }
-                    catch (JSONException e)
-                        {
-                            throw new RuntimeException(e);
-                        }
-                    String tempFromAPI;
-                    try {
-                        tempFromAPI =  jo.getJSONObject(oContext.getString(R.string.cur_weather)).get(oContext.getString(R.string.temperature)).toString();
-                        }
-                    catch (JSONException e)
-                        {
-                        throw new RuntimeException(e);
-                        }
-                    MainActivity.this.runOnUiThread(() -> {
-                        state.setTemp(tempFromAPI);
-                        adapter.notifyDataSetChanged();
-                        stcConnector.update(state);
-                    });
-                }
-            }
-            @Override
-            public void onFailure(Call call, IOException e) {
-                MainActivity.this.runOnUiThread(() -> {
-                    state.setTemp(String.valueOf(R.string.err_connect));
+            public void onSuccess(String temperature) {
+                runOnUiThread(() -> {
+                    state.setTemp(temperature);
                     adapter.notifyDataSetChanged();
                     stcConnector.update(state);
                 });
-
-                e.printStackTrace();
             }
 
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> {
+                    state.setTemp(error);
+                    adapter.notifyDataSetChanged();
+                    stcConnector.update(state);
+                });
+            }
         });
     }
 

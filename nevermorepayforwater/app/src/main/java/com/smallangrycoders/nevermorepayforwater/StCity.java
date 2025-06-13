@@ -2,6 +2,8 @@ package com.smallangrycoders.nevermorepayforwater;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StCity implements Serializable {
     private long id;
@@ -11,6 +13,9 @@ public class StCity implements Serializable {
     private String lat ;
     private String lon ;
     private LocalDateTime syncDate;
+    private String waterCons;
+
+    private List<String> prevTemp;
 
     //Getters
     public String getName() {
@@ -55,7 +60,8 @@ public class StCity implements Serializable {
         this.syncDate = syncDate;
     }
 
-    public StCity(long id, String name, String temp, String lat ,String lon , int flag, LocalDateTime syncDate){
+    public StCity(long id, String name, String temp, String lat , String lon , int flag, LocalDateTime syncDate, List<String> prevTemp, String waterCons){
+        this.waterCons = waterCons;
         setId(id);
         setName(name);
         setTemp(temp);
@@ -63,9 +69,37 @@ public class StCity implements Serializable {
         setSyncDate(syncDate);
         setStrLat(lat);
         setStrLon(lon);
+        setPrevTemp(prevTemp);
     }
 
     public long getId() {
         return this.id;
+    }
+
+
+    public List<String> getPrevTemp() {
+        if (prevTemp == null) {
+            prevTemp = new ArrayList<>();
+        }
+        return prevTemp;
+    }
+
+    public void setPrevTemp(List<String> numbersList) {
+        this.prevTemp = numbersList != null ? new ArrayList<>(numbersList) : new ArrayList<>();
+    }
+
+    public void addNumber(String number) {
+        prevTemp.add(number);
+        while (prevTemp.size() > 31) {
+            prevTemp.remove(0);
+        }
+    }
+
+    public String getWaterCons() {
+        return waterCons;
+    }
+
+    public void setWaterCons(String waterCons) {
+        this.waterCons = waterCons;
     }
 }
