@@ -13,9 +13,16 @@
     <string name="deleteAll">Очистить </string>
     <string name="add">Добавить</string>
     <string name="exit">Выход</string>
-    <string name="delete">удалить</string>
+    <string name="delete">Удалить</string>
     <string name="edit">Редактировать</string>
     <string name="save">Сохранить</string>
+    <string name="find_coordinates">Найти координаты</string>
+    <string name="location_hint">Введите название города</string>
+    <string name="latitude_hint">Широта</string>
+    <string name="longitude_hint">Долгота</string>
+    <string name="no_internet">Нет подключения</string>
+    <string name="err_geocoding">Ошибка геокодирования</string>
+    <string name="location_not_found">Местоположение не найдено</string>
     <string name="cancel">Отменить</string>
     <string name="location">Локация</string>
     <string name="tvLat">Широта</string>
