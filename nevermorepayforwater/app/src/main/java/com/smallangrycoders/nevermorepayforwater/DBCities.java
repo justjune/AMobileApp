@@ -40,10 +40,10 @@ public class DBCities {
         stcDataBase = mOpenHelper.getWritableDatabase();
     }
 
-    public void insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
+    public long insert(String name, String temp, String lat, String lon, int flag, LocalDateTime syncDate) {
         if (stcDataBase == null || !stcDataBase.isOpen()) {
             Log.e("DBCities", "Database is not available");
-            return;
+            return -1;
         }
 
         try {
@@ -55,14 +55,13 @@ public class DBCities {
             cv.put(COLUMN_FLAG2, flag);
             cv.put(COLUMN_SYNCDATE, syncDate != null ? syncDate.toString() : null);
 
-            long result = stcDataBase.insert(TABLE_NAME, null, cv);
-            if (result == -1) {
-                Log.e("DBCities", "Failed to insert record - possible constraint violation");
-            }
+            return stcDataBase.insert(TABLE_NAME, null, cv);
         } catch (SQLiteException e) {
             Log.e("DBCities", "Database error", e);
+            return -1;
         } catch (Exception e) {
             Log.e("DBCities", "Unexpected error", e);
+            return -1;
         }
     }
 

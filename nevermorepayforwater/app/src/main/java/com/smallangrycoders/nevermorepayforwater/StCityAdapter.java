@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder> {
@@ -44,7 +45,8 @@ public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder
     }
 
     public void setArrayMyData(List<StCity> arrayMyData) {
-        this.states = arrayMyData;
+        this.states = new ArrayList<>(arrayMyData);
+        notifyDataSetChanged();
     }
 
     @SuppressLint("SetTextI18n")
@@ -54,7 +56,6 @@ public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder
         StCity state = states.get(position);
         holder.nameView.setText(state.getName());
 
-        // Обработка температуры
         if (state.getTemp().startsWith(context.getString(R.string.err_no_internet)) ||
                 state.getTemp().startsWith(context.getString(R.string.err_connection_failed))) {
             holder.tempView.setText(state.getTemp());
@@ -85,7 +86,6 @@ public class StCityAdapter extends RecyclerView.Adapter<StCityAdapter.ViewHolder
     public int getItemCount() {
         return states.size();
     }
-
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 

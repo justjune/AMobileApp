@@ -35,7 +35,6 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
     DBCities stcConnector;
     Context oContext;
-    ArrayList<StCity> states = new ArrayList<>();
     StCityAdapter adapter;
     int ADD_ACTIVITY = 0;
 
@@ -94,9 +93,14 @@ public class MainActivity extends AppCompatActivity {
             try {
                 StCity st = (StCity) data.getExtras().getSerializable("StCity");
                 if (st != null) {
-                    stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(),
+                    long cityId = stcConnector.insert(st.getName(), st.getTemp(), st.getStrLat(), st.getStrLon(),
                             st.getFlagResource(), st.getSyncDate());
                     updateList();
+                    StCity newCity = findCityById(cityId);
+
+                    if (newCity != null) {
+                        sendPOST(newCity, adapter);
+                    }
                 } else {
                     Toast.makeText(this, R.string.error_invalid_data, Toast.LENGTH_SHORT).show();
                 }
@@ -105,6 +109,16 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private StCity findCityById(long id) {
+        ArrayList<StCity> cities = stcConnector.selectAll();
+        for (StCity city : cities) {
+            if (city.getId() == id) {
+                return city;
+            }
+        }
+        return null;
     }
 
     public void sendPOST(StCity state, StCityAdapter adapter) {
@@ -139,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
             client.newCall(request).enqueue(new Callback() {
                 @Override
-                public void onResponse(Call call, final Response response) throws IOException {
+                public void onResponse(Call call, final Response response) {
                     if (!response.isSuccessful()) {
                         handleError(state, adapter, getString(R.string.err_server_response));
                         return;
@@ -160,8 +174,9 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
                             state.setTemp(tempFromAPI);
                             state.setSyncDate(LocalDateTime.now());
-                            adapter.notifyDataSetChanged();
                             stcConnector.update(state);
+                            adapter.notifyDataSetChanged();
+                            updateList();
                         });
                     } catch (JSONException e) {
                         handleError(state, adapter, getString(R.string.err_parsing_data));
@@ -185,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
     private void handleError(StCity state, StCityAdapter adapter, String error) {
         runOnUiThread(() -> {
             state.setTemp(error);
+            state.setSyncDate(LocalDateTime.now());
             adapter.notifyDataSetChanged();
             stcConnector.update(state);
             Toast.makeText(oContext, error, Toast.LENGTH_SHORT).show();
