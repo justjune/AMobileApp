@@ -3,15 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.smallangrycoders.nevermorepayforwater">
-    <item android:id="@+id/add"
+
+    <item
+        android:id="@+id/add"
         android:title="@string/add"
-        android:icon="@android:drawable/ic_menu_add"/>
+        android:icon="@android:drawable/ic_menu_add" />
 
-    <item android:id="@+id/deleteAll"
+    <item
+        android:id="@+id/deleteAll"
         android:title="@string/deleteAll"
-        android:icon="@android:drawable/ic_menu_delete"/>
+        android:icon="@android:drawable/ic_menu_delete" />
 
-    <item android:id="@+id/exit"
+    <item
+        android:id="@+id/menu_enter_heat"
+        android:title="@string/enter_heat"
+        android:icon="@android:drawable/ic_menu_edit"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_set_volume"
+        android:title="@string/menu_set_volume"
+        android:icon="@android:drawable/ic_menu_manage"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_heat_report"
+        android:title="@string/heat_report"
+        android:icon="@android:drawable/ic_menu_info_details"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/exit"
         android:title="@string/exit"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"/>
+        android:icon="@android:drawable/ic_menu_close_clear_cancel" />
 </menu>

@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <DatePicker
+        android:id="@+id/datePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:calendarViewShown="false"/>
+
+    <EditText
+        android:id="@+id/etBat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="T батареи (°C)"
+        android:inputType="numberDecimal"/>
+
+    <EditText
+        android:id="@+id/etSrc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="T источника (°C)"
+        android:inputType="numberDecimal"/>
+
+    <Button
+        android:id="@+id/butSaveHeat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Сохранить"/>
+</LinearLayout>
