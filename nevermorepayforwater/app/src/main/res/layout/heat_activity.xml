@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Ввод объёма воды -->
+    <EditText
+        android:id="@+id/etVolume"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Объем воды, л"
+        android:inputType="numberDecimal"/>
+
+    <!-- Ввод температуры батареи -->
+    <EditText
+        android:id="@+id/etTempBattery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Темп. батареи, °C"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Ввод температуры воды -->
+    <EditText
+        android:id="@+id/etTempWater"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Темп. воды, °C"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Кнопка расчёта -->
+    <Button
+        android:id="@+id/butCalcHeat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Рассчитать тепло"
+        android:layout_marginTop="12dp"/>
+
+    <!-- Результат или сообщение об ошибке -->
+    <TextView
+        android:id="@+id/tvResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Результат: —"
+        android:textSize="18sp"
+        android:paddingTop="16dp"/>
+
+    <!-- Кнопка для возврата назад -->
+    <Button
+        android:id="@+id/butExit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Назад"
+        android:layout_marginTop="24dp"/>
+</LinearLayout>

@@ -33,7 +33,9 @@
 
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".HeatActivity"
+            android:exported="true" />
     </application>
 
 </manifest>
